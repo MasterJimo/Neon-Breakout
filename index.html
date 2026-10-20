@@ -19,7 +19,7 @@
         <div class="stats-group">
           <div class="stat stat-score"><span class="stat-label">SCORE</span><strong id="scoreValue" aria-live="polite">000000</strong></div>
           <div class="stat stat-best"><span class="stat-label">PERSONAL BEST</span><strong id="bestValue">000000</strong></div>
-          <div class="stat stat-level"><span class="stat-label">STAGE</span><strong id="levelValue">01</strong></div>
+          <div class="stat stat-level"><span class="stat-label">STAGE</span><strong id="levelValue">01</strong><span class="sector-label" id="stageTag">SECTOR 01 · INITIALIZE</span></div>
           <div class="stat stat-lives"><span class="stat-label">LIVES REMAINING</span><div id="livesValue" class="lives" aria-label="3 lives">♥ ♥ ♥</div></div>
         </div>
         <div class="audio-toolbar">
@@ -42,7 +42,7 @@
 
       <div class="playfield" id="playfield">
         <canvas id="gameCanvas" width="960" height="600" aria-label="Move paddle to bounce the ball and break the bricks"></canvas>
-        <div class="stage-tag" aria-hidden="true"><span class="stage-dot"></span><span id="stageTag">SECTOR 01 · INITIALIZE</span></div>
+        
         <div class="combo-pill" id="comboPill" aria-hidden="true"></div>
 
         <div class="overlay minimal-start" id="overlay">
