@@ -244,7 +244,7 @@
     bricks = [];
     const cols = 12;
     const phase = ((level - 1) % 3) + 1;
-    const rows = phase === 1 ? 3 : phase === 2 ? 4 : 5;
+    const rows = phase === 1 ? 5 : phase === 2 ? 6 : 7;
     const bw = 65, bh = 27, gapX = 8, gapY = 12;
     const ox = (W - cols * bw - (cols - 1) * gapX) / 2;
     for (let r = 0; r < rows; r++) {
