@@ -6,7 +6,8 @@
   const TOP = 42;
   const MAX_SPEED = 705;
   const LEVELS = 3;
-  // Neon palette adapted from Star Swarm: hot pink, amber, mint, electric blue.\n  const PALETTES = ["#ff73b7", "#f7ad50", "#43e0bf", "#49bfff", "#ab86ff", "#6bdcff", "#ff70bd"];
+  // Neon palette adapted from Star Swarm: hot pink, amber, mint, electric blue.
+  const PALETTES = ["#ff73b7", "#f7ad50", "#43e0bf", "#49bfff", "#ab86ff", "#6bdcff", "#ff70bd"];
   const STAGES = ["INITIALIZE", "OVERDRIVE", "FINAL FREQUENCY"];
   const $ = id => document.getElementById(id);
 
