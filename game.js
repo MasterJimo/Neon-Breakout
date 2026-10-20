@@ -6,7 +6,7 @@
   const TOP = 42;
   const MAX_SPEED = 705;
   const LEVELS = 3;
-  const PALETTES = ["#fa6db7", "#c377ff", "#877cff", "#60a7ff", "#4de5f3", "#4af0c5", "#ffd475"];
+  // Neon palette adapted from Star Swarm: hot pink, amber, mint, electric blue.\n  const PALETTES = ["#ff73b7", "#f7ad50", "#43e0bf", "#49bfff", "#ab86ff", "#6bdcff", "#ff70bd"];
   const STAGES = ["INITIALIZE", "OVERDRIVE", "FINAL FREQUENCY"];
   const $ = id => document.getElementById(id);
 
@@ -391,7 +391,7 @@
       say("SLOW-MO · 9 SECONDS");
     }
     sound(780, .2, "sine", .065, 1220);
-    burst(paddle.x, paddle.y, type === "W" ? "#4de5f3" : type === "M" ? "#d386ff" : "#ffcd7a", 26);
+    burst(paddle.x, paddle.y, type === "W" ? "#7cf5ff" : type === "M" ? "#ff73b7" : "#f7ad50", 26);
     hud();
   }
 
@@ -582,7 +582,7 @@
       if (b.hp <= 0) continue;
       if (b.powerupType) {
         // Hollow glass + luminous outline; unlike ordinary solid neon bricks.
-        const accent = { W: "#4de5f3", M: "#d98aff", S: "#ffc979" }[b.powerupType];
+        const accent = { W: "#7cf5ff", M: "#ff73b7", S: "#f7ad50" }[b.powerupType];
         const pulse = .73 + .19 * Math.sin(clock * 3.1 + b.x * .025);
         const cx = b.x + b.w / 2;
         const cy = b.y + b.h / 2;
@@ -630,30 +630,46 @@
         continue;
       }
       ctx.save();
+      // Opaque vivid body + bloom, matching the ship colors in Star Swarm.
+      // Two-hit bricks stay bright, with a visible reinforcing inset.
       const faded = b.maxHp === 2 && b.hp === 1;
+      ctx.globalAlpha = faded ? .67 : 1;
       ctx.shadowColor = b.color;
-      ctx.shadowBlur = faded ? 7 : 15;
-      ctx.globalAlpha = faded ? .8 : 1;
-      const g = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
-      g.addColorStop(0, b.color);
-      g.addColorStop(1, faded ? "#29314f" : "#243456");
-      ctx.fillStyle = g;
+      ctx.shadowBlur = faded ? 12 : 23;
+      ctx.fillStyle = b.color;
       rr(b.x, b.y, b.w, b.h, 4);
       ctx.fill();
+
+      // A soft beveled glass face keeps the brick saturated, not dark/empty.
       ctx.shadowBlur = 0;
-      ctx.fillStyle = "rgba(6, 13, 30, .55)";
-      rr(b.x + 2.5, b.y + 4, b.w - 5, b.h - 6, 3);
+      const sheen = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
+      sheen.addColorStop(0, "rgba(255,255,255,.52)");
+      sheen.addColorStop(.22, "rgba(255,255,255,.12)");
+      sheen.addColorStop(.64, "rgba(255,255,255,0)");
+      sheen.addColorStop(1, "rgba(7,13,38,.28)");
+      ctx.fillStyle = sheen;
+      rr(b.x + 1, b.y + 1, b.w - 2, b.h - 2, 3);
       ctx.fill();
-      ctx.fillStyle = b.color;
-      rr(b.x + 4, b.y + 3, b.w - 8, 3, 1.5);
+
+      ctx.strokeStyle = "rgba(255,255,255,.58)";
+      ctx.lineWidth = 1;
+      rr(b.x + 1.5, b.y + 1.5, b.w - 3, b.h - 3, 3);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,.63)";
+      rr(b.x + 7, b.y + 3, b.w - 14, 2, 1);
+      ctx.fill();
+      ctx.fillStyle = "rgba(8,14,38,.23)";
+      rr(b.x + 6, b.y + b.h - 5, b.w - 12, 2, 1);
       ctx.fill();
       if (b.maxHp === 2) {
-        ctx.strokeStyle = "rgba(239, 245, 255, .55)";
-        ctx.lineWidth = 1;
-        rr(b.x + 8, b.y + 10, b.w - 16, 9, 2);
+        // Armor is a subtle pair of bars, not the hollow bonus-brick border.
+        ctx.strokeStyle = "rgba(7,17,40,.55)";
+        ctx.lineWidth = 1.2;
+        rr(b.x + 6, b.y + 6, b.w - 12, b.h - 12, 2);
         ctx.stroke();
-        ctx.fillStyle = "rgba(255, 255, 255, .6)";
-        ctx.fillRect(b.x + b.w / 2 - 7, b.y + 13, 14, 2);
+        ctx.fillStyle = "rgba(255,255,255,.85)";
+        ctx.fillRect(b.x + b.w / 2 - 9, b.y + 10, 7, 4);
+        ctx.fillRect(b.x + b.w / 2 + 2, b.y + 10, 7, 4);
       }
       if (b.flash > 0) {
         ctx.globalAlpha = Math.min(1, b.flash * 6);
@@ -732,7 +748,7 @@
   }
 
   function drawPowerups() {
-    const colors = { W: "#4de5f3", M: "#d98aff", S: "#ffc979" };
+    const colors = { W: "#7cf5ff", M: "#ff73b7", S: "#f7ad50" };
     for (const p of powerups) {
       const color = colors[p.type];
       ctx.save();
