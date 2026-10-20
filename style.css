@@ -501,3 +501,34 @@ body { overflow-x: hidden; }
   .app { height: auto; min-height: 100dvh; }
   .machine { width: min(100%, 850px); }
 }
+
+/* Keep the cockpit in one row on ordinary desktop/laptop game widths.
+   Previously the 1000px container breakpoint needlessly doubled HUD height. */
+@container (min-width: 800px) and (max-width: 1000px) {
+  .dashboard {
+    flex-wrap: nowrap;
+    min-height: 70px;
+    padding: 9px 13px;
+    gap: 12px;
+  }
+  .stats-group {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: clamp(9px, 1cqw, 16px);
+  }
+  .stats-group .stat strong { font-size: clamp(17px, 2cqw, 21px); }
+  .stats-group .stat-label { font-size: 7px; letter-spacing: .035em; }
+  .stats-group .lives { font-size: 18px; gap: 3px; }
+  .audio-toolbar {
+    flex: 0 0 auto;
+    width: auto;
+    justify-content: flex-end;
+    gap: 7px;
+  }
+  .audio-toolbar .pause-button,
+  .audio-toolbar .icon-button { width: 31px; height: 31px; }
+  .volume-control { width: clamp(80px, 10cqw, 103px); }
+  .volume-heading { font-size: 8px; }
+  .volume-control output { font-size: 9px; }
+}
