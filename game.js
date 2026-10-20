@@ -232,8 +232,8 @@
     bricks = [];
     const cols = 12;
     const phase = ((level - 1) % 3) + 1;
-    const rows = phase === 1 ? 5 : phase === 2 ? 6 : 7;
-    const bw = 61, bh = 24, gapX = 9, gapY = 12;
+    const rows = phase === 1 ? 3 : phase === 2 ? 4 : 5;
+    const bw = 65, bh = 27, gapX = 8, gapY = 12;
     const ox = (W - cols * bw - (cols - 1) * gapX) / 2;
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
@@ -245,8 +245,8 @@
         bricks.push({
           x: ox + c * (bw + gapX), y: 105 + r * (bh + gapY),
           w: bw, h: bh, hp: heavy ? 2 : 1, maxHp: heavy ? 2 : 1,
-          color: [PALETTES[3], PALETTES[0], PALETTES[1], PALETTES[2],
-            PALETTES[4], PALETTES[5], PALETTES[6]][r], flash: 0, row: r
+          color: ["#28caff", "#ff43ba", "#ffb33d", "#2ce9cb",
+            "#a37aff", "#54c9ff", "#ff74bc"][r], flash: 0, row: r
         });
       }
     }
@@ -348,9 +348,9 @@
     state = "interlude";
     interludeTimer = 1.75;
     worldFlash = .7;
-    ring(W / 2, H * .47, "#49dfff", 40, 1.55, 660, 7);
-    ring(W / 2, H * .47, "#ff73b7", 0, 1.45, 560, 2);
-    fireworks(W / 2, H * .35, "#65eaff", 95);
+    ring(W / 2, H * .47, "#49dfff", 40, 1.68, 660, 10);
+    ring(W / 2, H * .47, "#ff73b7", 0, 1.68, 560, 3);
+    fireworks(W / 2, H * .35, "#65eaff", 135);
     callout(744, 102, "STAGE CLEAR", "#6df8ff", 1.7);
     say("SECTOR " + String(level).padStart(2, "0") + " CLEARED · +" + bonus, 1.1);
     hud();
@@ -435,8 +435,8 @@
     shake = Math.max(shake, brick.hp === 0 ? 3.3 : 1.9);
     const cx = brick.x + brick.w / 2;
     const cy = brick.y + brick.h / 2;
-    burst(cx, cy, brick.color, brick.hp === 0 ? 25 : 9, brick.hp === 0 ? 1.25 : .62);
-    ring(cx, cy, brick.color, 3, brick.hp === 0 ? .52 : .26, brick.hp === 0 ? 60 : 32, 2.3);
+    burst(cx, cy, brick.color, brick.hp === 0 ? 47 : 17, brick.hp === 0 ? 1.55 : .88);
+    ring(cx, cy, brick.color, 3, brick.hp === 0 ? .7 : .33, brick.hp === 0 ? 102 : 46, 3.9);
     if (brick.hp > 0) callout(cx, cy - 20, "BRICK HIT", brick.color, .55);
     sound(brick.hp === 0 ? 430 + brick.row * 60 : 230, .06, "triangle", .035, 730);
     if (brick.hp === 0) {
@@ -692,76 +692,92 @@
       if (b.hp <= 0) continue;
       const appear = Math.max(0, Math.min(1, (stageReveal - b.row * .11) / .28));
       if (appear <= 0) continue;
+      const special = Boolean(b.powerupType);
       const damaged = b.maxHp === 2 && b.hp === 1;
-      const color = b.powerupType
-        ? ({ W: "#67f6ff", M: "#ff77d2", S: "#ffc96b" })[b.powerupType]
+      const color = special
+        ? ({ W: "#5cfcff", M: "#ff68dd", S: "#ffcb4d" })[b.powerupType]
         : b.color;
+      const x = b.x, y = b.y, w = b.w, h = b.h;
       ctx.save();
-      ctx.globalAlpha = appear * (damaged ? .76 : 1);
-      // Saturated dark glass center rather than a flat solid rectangle.
-      ctx.fillStyle = "#0c1a35";
-      rr(b.x, b.y, b.w, b.h, 4);
-      ctx.fill();
-      const glass = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
-      glass.addColorStop(0, color);
-      glass.addColorStop(.18, "rgba(42,95,148,.58)");
-      glass.addColorStop(.5, "rgba(15,31,69,.84)");
-      glass.addColorStop(1, "rgba(5,15,40,.95)");
-      ctx.fillStyle = glass;
-      ctx.globalAlpha = appear * (b.powerupType ? .24 : .67);
-      rr(b.x + 1, b.y + 1, b.w - 2, b.h - 2, 3);
-      ctx.fill();
-
-      // Hot neon tube outline with layered glow and white lens highlight.
       ctx.globalAlpha = appear;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = b.powerupType ? 2.6 : 2.35;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = b.powerupType ? 32 : 23;
-      rr(b.x + 1.2, b.y + 1.2, b.w - 2.4, b.h - 2.4, 4);
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = "rgba(220,250,255,.62)";
-      ctx.lineWidth = .85;
-      rr(b.x + 3.3, b.y + 3.3, b.w - 6.6, b.h - 6.6, 2.6);
-      ctx.stroke();
 
-      ctx.fillStyle = "rgba(255,255,255,.50)";
-      rr(b.x + 8, b.y + 3.5, b.w - 16, 1.6, 1);
+      // Large, diffuse physical glow behind every tile; the old dark-grey
+      // interior made the bricks look unlit in comparison with the mockup.
+      ctx.shadowColor = color;
+      ctx.shadowBlur = special ? 40 : 44;
+      ctx.fillStyle = color;
+      ctx.globalAlpha = appear * (special ? .19 : .34);
+      rr(x - 1, y - 1, w + 2, h + 2, 5);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // True saturated neon glass fill. Only bonus tiles stay visibly hollow.
+      ctx.globalAlpha = appear * (special ? .17 : damaged ? .53 : .77);
+      ctx.fillStyle = color;
+      rr(x, y, w, h, 5);
+      ctx.fill();
+      ctx.globalAlpha = appear;
+      const lens = ctx.createLinearGradient(x, y, x, y + h);
+      lens.addColorStop(0, "rgba(255,255,255,.55)");
+      lens.addColorStop(.18, "rgba(255,255,255,.16)");
+      lens.addColorStop(.50, "rgba(255,255,255,.035)");
+      lens.addColorStop(1, special ? "rgba(4,8,28,.15)" : "rgba(1,4,23,.27)");
+      ctx.fillStyle = lens;
+      rr(x + 2, y + 2, w - 4, h - 4, 3);
       ctx.fill();
 
-      if (b.powerupType) {
-        // Outline-only reward brick; keep the center dark and add a power diamond.
-        const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
-        const pulse = .86 + .14 * Math.sin(clock * 5 + b.x / 40);
+      // A bright luminous rim, a narrower hot-white rim and an upper light bar.
+      ctx.strokeStyle = color;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 33;
+      ctx.lineWidth = special ? 3.5 : 3.25;
+      rr(x + 1.3, y + 1.3, w - 2.6, h - 2.6, 4);
+      ctx.stroke();
+      ctx.shadowBlur = 10;
+      ctx.strokeStyle = special ? "rgba(241,255,255,.93)" : "rgba(255,255,255,.77)";
+      ctx.lineWidth = 1.05;
+      rr(x + 3.2, y + 3.2, w - 6.4, h - 6.4, 3);
+      ctx.stroke();
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = "rgba(255,255,255,.82)";
+      rr(x + 8, y + 3, w - 16, 2.2, 1.1);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      if (special) {
+        // Marked power-up tile stays recognizable in the brighter formation.
+        // Dark central window and a pulsing diamond without changing drop logic.
+        ctx.globalAlpha = appear * .68;
+        ctx.fillStyle = "rgba(3,9,32,.60)";
+        rr(x + 10, y + 7, w - 20, h - 14, 3);
+        ctx.fill();
+        const cx = x + w/2, cy = y + h/2;
+        ctx.globalAlpha = appear * (.77 + .23*Math.sin(clock*5 + x*.018));
         ctx.fillStyle = color;
         ctx.shadowColor = color;
-        ctx.shadowBlur = 10;
-        ctx.globalAlpha = appear * pulse;
+        ctx.shadowBlur = 17;
         ctx.beginPath();
-        ctx.moveTo(cx,cy-6);ctx.lineTo(cx+7,cy);
-        ctx.lineTo(cx,cy+6);ctx.lineTo(cx-7,cy);ctx.closePath();
-        ctx.fill();
+        ctx.moveTo(cx, cy - 7);ctx.lineTo(cx + 8,cy);
+        ctx.lineTo(cx,cy + 7);ctx.lineTo(cx - 8,cy);
+        ctx.closePath();ctx.fill();
         ctx.shadowBlur = 0;
-        ctx.fillStyle = "#09132b";
+        ctx.fillStyle = "#06152c";
         ctx.beginPath();
-        ctx.moveTo(cx,cy-3);ctx.lineTo(cx+3.7,cy);
-        ctx.lineTo(cx,cy+3);ctx.lineTo(cx-3.7,cy);ctx.closePath();
-        ctx.fill();
+        ctx.moveTo(cx,cy - 3.1);ctx.lineTo(cx + 3.8,cy);
+        ctx.lineTo(cx,cy + 3.1);ctx.lineTo(cx - 3.8,cy);
+        ctx.closePath();ctx.fill();
       } else if (b.maxHp === 2) {
-        // Reinforced bricks use a restrained internal armor glyph.
-        ctx.fillStyle = "rgba(240,254,255,.8)";
-        ctx.fillRect(b.x + b.w / 2 - 9, b.y + 9, 6, 4);
-        ctx.fillRect(b.x + b.w / 2 + 3, b.y + 9, 6, 4);
+        ctx.globalAlpha = appear * .9;
+        ctx.fillStyle = "rgba(255,255,255,.91)";
+        ctx.fillRect(x+w/2-9, y+10, 6, 4);
+        ctx.fillRect(x+w/2+3, y+10, 6, 4);
       }
 
       if (b.flash > 0) {
-        ctx.globalAlpha = appear * Math.min(1, b.flash * 6);
-        ctx.fillStyle = "#fff";
-        ctx.shadowColor = "#ffffff";
-        ctx.shadowBlur = 22;
-        rr(b.x - 1, b.y - 1, b.w + 2, b.h + 2, 4);
-        ctx.fill();
+        ctx.globalAlpha = appear * Math.min(1, b.flash * 8);
+        ctx.shadowColor = "#ffffff"; ctx.shadowBlur = 26;
+        ctx.fillStyle = "#ffffff";
+        rr(x-2,y-2,w+4,h+4,5); ctx.fill();
       }
       ctx.restore();
     }
