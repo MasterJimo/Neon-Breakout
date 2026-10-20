@@ -155,3 +155,144 @@ kbd { display: inline-grid; place-items: center; min-width: 23px; height: 23px; 
   .footer { justify-content: center; padding: 22px 4px; text-align: center; line-height: 1.6; }
 }
 @media (prefers-reduced-motion: reduce) { *, *:before, *:after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+/* Compact single-screen arcade layout */
+html, body { min-height: 100%; }
+body { overflow-x: hidden; }
+.app {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding: 12px clamp(10px, 1.5vw, 24px);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.machine {
+  flex: none;
+  width: min(100%, 1440px, calc((100dvh - 210px) * 1.6));
+  margin: 0 auto;
+}
+.dashboard {
+  min-height: 67px;
+  padding: 11px 22px;
+  gap: clamp(10px, 2vw, 32px);
+}
+.dashboard .stat { min-width: 0; }
+.dashboard .dash-divider { margin-left: auto; }
+.dashboard .pause-button { margin-left: 0; }
+.dashboard .icon-button {
+  flex: none;
+  width: 37px;
+  height: 37px;
+  margin-left: -19px;
+}
+.playfield { aspect-ratio: 960 / 600; }
+.machine-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  min-height: 0;
+  padding: 0 22px;
+  gap: 0;
+}
+.instruction-row {
+  min-height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+}
+.instruction-row .controls {
+  flex-wrap: wrap;
+  gap: clamp(10px, 1.5vw, 21px);
+}
+.machine-bottom .controls-title {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  color: #8fa5cc;
+  letter-spacing: .12em;
+  font-size: 9px;
+  font-weight: 850;
+}
+.machine-bottom .progress { display: flex; }
+.machine-bottom .touch-instruction { display: none; }
+.powerup-row {
+  min-height: 36px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(10px, 2vw, 23px);
+  border-top: 1px solid rgba(117,153,224,.17);
+  padding: 8px 0;
+}
+.powerup-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  color: #adbedf;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .055em;
+}
+.powerup-item .power { flex: none; }
+@media (max-width: 950px) {
+  .dashboard { gap: 16px; }
+  .dashboard .icon-button { margin-left: -8px; }
+  .instruction-row .controls { gap: 10px; }
+  .instruction-row { gap: 9px; }
+  .progress-track { width: 64px; }
+  .progress { gap: 7px; font-size: 8px; }
+}
+@media (max-width: 650px) {
+  .app { padding: 10px; }
+  .machine { width: 100%; border-radius: 11px; }
+  .dashboard { min-height: 57px; gap: 8px; padding: 8px 10px; }
+  .dashboard .stat-label { font-size: 7px; letter-spacing: .035em; }
+  .dashboard .stat strong { font-size: 17px; }
+  .dashboard .stat-best, .dashboard .dash-divider { display: none; }
+  .dashboard .stat-level { margin-left: auto; }
+  .dashboard .stat-lives { min-width: 0; }
+  .dashboard .lives { font-size: 18px; gap: 4px; }
+  .dashboard .pause-button, .dashboard .icon-button {
+    width: 30px;
+    height: 30px;
+    margin-left: 0;
+  }
+  .dashboard .icon-button svg { width: 16px; height: 16px; }
+  .playfield { aspect-ratio: 960 / 600; }
+  .machine-bottom { padding: 0 12px; }
+  .instruction-row { padding: 9px 0; min-height: 38px; }
+  .instruction-row .controls { gap: 9px; }
+  .instruction-row .controls .desktop-instruction { display: none; }
+  .machine-bottom .controls-title { display: inline-flex; font-size: 8px; }
+  .instruction-row .controls .touch-instruction {
+    display: inline;
+    white-space: normal;
+    text-align: left;
+    font-size: 9px;
+    color: #a4b9dc;
+    font-weight: 750;
+    letter-spacing: .035em;
+  }
+  .machine-bottom .progress { display: none; }
+  .powerup-row { justify-content: center; min-height: 37px; gap: 7px 13px; }
+  .powerup-row .controls-title { flex-basis: 100%; justify-content: center; }
+  .powerup-item { font-size: 9px; gap: 4px; }
+}
+@media (max-width: 375px) {
+  .dashboard .stat strong { font-size: 15px; }
+  .dashboard .lives { font-size: 16px; gap: 2px; }
+  .powerup-row { gap: 7px 8px; }
+  .powerup-item { font-size: 8px; }
+}
+@media (max-height: 510px) {
+  .app { height: auto; min-height: 100dvh; }
+  .machine { width: min(100%, 850px); }
+}
