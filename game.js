@@ -34,6 +34,10 @@
   let balls = [];
   let particles = [];
   let floaters = [];
+  let shockwaves = [];
+  let callouts = [];
+  let stageReveal = 2;
+  let worldFlash = 0;
   let powerups = [];
   let ballDocked = true;
   let combo = 0;
@@ -210,6 +214,9 @@
     paddle.x = W / 2;
     particles = [];
     floaters = [];
+    shockwaves = [];
+    callouts = [];
+    worldFlash = 0;
     powerups = [];
     createLevel();
     state = "playing";
@@ -268,6 +275,7 @@
     paddle.wideTimer = 0;
     paddle.w = 118;
     spawnBall();
+    stageReveal = level === 1 ? 2 : 0;
     hud();
   }
 
@@ -310,6 +318,9 @@
     state = "playing";
     hideOverlay();
     say("SECTOR " + String(level).padStart(2, "0") + " · READY · LAUNCH!", 2);
+    worldFlash = .24;
+    ring(W / 2, 184, "#65eeff", 95, .55, 700, 5);
+    callout(W / 2 + 155, 88, "NEW WAVE", "#67f1ff", 1.45);
     hud();
   }
 
@@ -334,7 +345,12 @@
     saveBest();
     sound(620, .24, "triangle", .05, 970);
     state = "interlude";
-    interludeTimer = 1.1;
+    interludeTimer = 1.75;
+    worldFlash = .7;
+    ring(W / 2, H * .47, "#49dfff", 40, 1.55, 660, 7);
+    ring(W / 2, H * .47, "#ff73b7", 0, 1.45, 560, 2);
+    fireworks(W / 2, H * .35, "#65eaff", 95);
+    callout(744, 102, "STAGE CLEAR", "#6df8ff", 1.7);
     say("SECTOR " + String(level).padStart(2, "0") + " CLEARED · +" + bonus, 1.1);
     hud();
   }
@@ -374,15 +390,32 @@
     return dx * dx + dy * dy <= ball.r * ball.r;
   }
 
+  // Tiny squares, shards, sparks and luminous streaks: procedural 2D neon VFX.
   function burst(x, y, color, amount = 10, force = 1) {
-    for (let i = 0; i < amount && particles.length < 440; i++) {
+    for (let i = 0; i < amount && particles.length < 480; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = (35 + Math.random() * 200) * force;
-      const life = .23 + Math.random() * .48;
-      particles.push({ x, y, vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed, life, maxLife: life,
-        size: 1.2 + Math.random() * 3.2, color });
+      const speed = (50 + Math.random() * 280) * force;
+      const life = .3 + Math.random() * .52;
+      particles.push({
+        x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+        life, maxLife: life, size: 1.6 + Math.random() * 4.2,
+        kind: Math.floor(Math.random() * 4), rotation: Math.random() * Math.PI * 2,
+        spin: (Math.random() - .5) * 9, color
+      });
     }
+  }
+
+  function ring(x, y, color, startRadius = 5, lifetime = .5, endRadius = 90, width = 2.5) {
+    shockwaves.push({ x, y, color, radius: startRadius, startRadius,
+      endRadius, life: lifetime, maxLife: lifetime, width });
+    if (shockwaves.length > 20) shockwaves.shift();
+  }
+
+  function callout(x, y, text, color = "#66edff", lifetime = .95) {
+    // Callouts cannot block the ball or the player's view for long.
+    callouts.push({ x: Math.max(65, Math.min(W - 170, x)), y: Math.max(84, Math.min(H - 125, y)),
+      text, color, life: lifetime, maxLife: lifetime });
+    if (callouts.length > 5) callouts.shift();
   }
 
   function fireworks(x, y, color, amount) {
@@ -399,7 +432,11 @@
     brick.hp--;
     brick.flash = .16;
     shake = Math.max(shake, brick.hp === 0 ? 3.3 : 1.9);
-    burst(ball.x, ball.y, brick.color, brick.hp === 0 ? 12 : 6);
+    const cx = brick.x + brick.w / 2;
+    const cy = brick.y + brick.h / 2;
+    burst(cx, cy, brick.color, brick.hp === 0 ? 25 : 9, brick.hp === 0 ? 1.25 : .62);
+    ring(cx, cy, brick.color, 3, brick.hp === 0 ? .52 : .26, brick.hp === 0 ? 60 : 32, 2.3);
+    if (brick.hp > 0) callout(cx, cy - 20, "BRICK HIT", brick.color, .55);
     sound(brick.hp === 0 ? 430 + brick.row * 60 : 230, .06, "triangle", .035, 730);
     if (brick.hp === 0) {
       if (comboTimeout > 0) combo = Math.min(combo + 1, 5);
@@ -409,6 +446,9 @@
       score += gained;
       if (score > best) saveBest();
       floating(brick.x + brick.w / 2, brick.y + 8, "+" + gained, brick.color);
+      if (combo === 1 || combo % 4 === 0 || brick.powerupType) {
+        callout(cx, cy - 21, "BRICK DESTROYED", brick.color, .9);
+      }
       if (brick.powerupType) dropPowerup(brick);
     } else {
       score += 25;
@@ -422,6 +462,9 @@
     if (!type) return;
     powerups.push({ x: brick.x + brick.w / 2, y: brick.y + brick.h / 2,
       type, vy: 128, spin: Math.random() * 6 });
+    ring(brick.x + brick.w / 2, brick.y + brick.h / 2,
+      type === "W" ? "#67f8ff" : type === "M" ? "#ff73b7" : "#ffca6a", 8, .53, 66, 2);
+    callout(brick.x + brick.w / 2, brick.y - 26, "POWER-UP", "#ffc96b", 1);
   }
 
   function takePowerup(type) {
@@ -447,7 +490,11 @@
       say("SLOW-MO · 9 SECONDS");
     }
     sound(780, .2, "sine", .065, 1220);
-    burst(paddle.x, paddle.y, type === "W" ? "#7cf5ff" : type === "M" ? "#ff73b7" : "#f7ad50", 26);
+    const pickupColor = type === "W" ? "#7cf5ff" : type === "M" ? "#ff73b7" : "#f7ad50";
+    burst(paddle.x, paddle.y - 10, pickupColor, 36, 1.25);
+    ring(paddle.x, paddle.y - 10, pickupColor, 7, .9, 145, 4);
+    callout(paddle.x, paddle.y - 95, "POWER-UP", pickupColor, 1.25);
+    worldFlash = Math.max(worldFlash, .12);
     hud();
   }
 
