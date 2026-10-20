@@ -41,7 +41,9 @@
   let toastTimer = 0;
   let muted = false;
   let audio = null;
+  const FRAME_MS = 1000 / 60; // Strict average rendering cap: 60 FPS on any refresh-rate display.
   let lastFrame = 0;
+  let nextFrameAt = 0;
   let pointerActive = false;
   const keys = new Set();
 
@@ -573,13 +575,6 @@
     ctx.strokeStyle = "rgba(74, 200, 250, .17)";
     ctx.beginPath(); ctx.moveTo(30, H - 29); ctx.lineTo(W - 30, H - 29); ctx.stroke();
 
-    ctx.fillStyle = "rgba(118, 146, 205, .36)";
-    ctx.font = 'bold 9px "Segoe UI", sans-serif';
-    ctx.textAlign = "left";
-    ctx.fillText("N / B     //     ARCADE SYSTEM", 32, H - 12);
-    ctx.textAlign = "right";
-    ctx.fillText("60 FPS  •  INSERT SKILL", W - 32, H - 12);
-    ctx.textAlign = "left";
   }
 
   function drawBricks() {
@@ -808,9 +803,18 @@
   }
 
   function frame(timestamp) {
-    if (!lastFrame) lastFrame = timestamp;
-    const dt = Math.min(.035, Math.max(0, (timestamp - lastFrame) / 1000));
+    // RequestAnimationFrame follows the monitor (up to 240 Hz or more).
+    // Only update and draw when the next 60 Hz slot is due.
+    requestAnimationFrame(frame);
+    if (!nextFrameAt) nextFrameAt = timestamp;
+    if (timestamp < nextFrameAt) return;
+
+    const dt = lastFrame ? Math.min(.035, Math.max(0, (timestamp - lastFrame) / 1000)) : 1 / 60;
     lastFrame = timestamp;
+    nextFrameAt += FRAME_MS;
+    // Don't run catch-up bursts after an inactive tab or a long stall.
+    if (timestamp - nextFrameAt > FRAME_MS * 2) nextFrameAt = timestamp + FRAME_MS;
+
     clock += dt;
     shake *= Math.pow(.76, dt * 60);
     for (const brick of bricks) brick.flash = Math.max(0, brick.flash - dt);
@@ -824,7 +828,6 @@
       if (interludeTimer <= 0) nextLevel();
     }
     render(dt);
-    requestAnimationFrame(frame);
   }
 
   function resize() {
