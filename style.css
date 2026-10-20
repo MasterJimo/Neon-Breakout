@@ -300,3 +300,28 @@ body { overflow-x: hidden; }
 /* Key for guaranteed power-up bricks in the bottom panel */
 .power.bonus { color: #83f5ff; border: 1px solid #83f5ff; box-shadow: 0 0 9px rgba(91,235,255,.28); font-size: 13px; }
 @media (max-width: 800px) { .powerup-row { gap: 8px 14px; } }
+
+/* Music attribution inside the arcade machine */
+.machine { width: min(100%, 1440px, calc((100dvh - 240px) * 1.6)); }
+.music-credit-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 27px;
+  padding: 5px 8px;
+  border-top: 1px solid rgba(117, 153, 224, .17);
+}
+.music-credit {
+  font-size: 9px;
+  font-weight: 800;
+  color: #8ea8d3;
+  letter-spacing: .12em;
+  text-align: center;
+}
+@media (max-width: 650px) {
+  .music-credit-row { min-height: 24px; padding: 5px 0; }
+  .music-credit { font-size: 8px; letter-spacing: .06em; }
+}
+@media (max-height: 510px) {
+  .machine { width: min(100%, 850px); }
+}
