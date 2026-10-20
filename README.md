@@ -43,16 +43,49 @@ All visual effects are generated directly in Canvas and do not require external 
 
 Some later-sector bricks need **two hits** to break. Keep an eye on your remaining lives and sector progress!
 
-## 🎵 Music
+## 🎵 Music & asset credits
 
-**Background track:** **“Technocade” (Looping)** by **Eric Matyas** — Soundimage.org.
+This section distinguishes **assets actually used in the game** from **visual references**. Credits are included even where the license does not require them.
 
-- **Original track and download:** [TECHNOCADE (Looping) on OpenGameArt](https://opengameart.org/content/technocade-looping)
-- **Artist's website:** [Soundimage.org](https://soundimage.org/)
-- **License:** [Creative Commons Attribution 3.0 (CC BY 3.0)](https://creativecommons.org/licenses/by/3.0/)
-- **Attribution:** “Technocade” by Eric Matyas — Soundimage.org.
-- Original looping audio is streamed from OpenGameArt; no changes were made to the music.
+### Music — included in the game (attribution required)
 
-The soundtrack begins after pressing **Start Game** and loops throughout the run. The top bar has independent **SFX** and **Music** sliders (0–100%). Their values are saved in your browser. Press **M** or the speaker button to mute/unmute both without losing your volume settings. An internet connection is needed to load the track.
+- **Track:** **"Technocade" (Looping)**
+- **Composer / creator:** **Eric Matyas**
+- **Artist's website:** https://soundimage.org/
+- **Original publication and download page:** https://opengameart.org/content/technocade-looping
+- **Audio files published with the track:**
+  - OGG: https://opengameart.org/sites/default/files/technocade.ogg
+  - MP3: https://opengameart.org/sites/default/files/technocade_0.mp3
+- **License:** Creative Commons Attribution 3.0 Unported (**CC BY 3.0**) — https://creativecommons.org/licenses/by/3.0/
+- **Required attribution, as requested by the composer:** **"Technocade" by Eric Matyas — Soundimage.org.**
+- **Changes:** No remix or editing of the original audio. The game loops the published track and adjusts playback volume during runtime.
+
+The game currently loads this music from OpenGameArt. Internet access is needed for playback. Music starts after the player presses **Start Game** and can be adjusted independently with the **Music** slider.
+
+### Particle effects and graphics — original code, visual references credited
+
+- **Kenney / Kenney Vleugels — Particle Pack**  
+  Asset page: https://kenney.nl/assets/particle-pack  
+  Alternative publication: https://opengameart.org/content/particle-pack-80-sprites  
+  License of Kenney's pack: **CC0 1.0** — https://creativecommons.org/publicdomain/zero/1.0/  
+  **Usage status:** Visual inspiration for the glowing particle style. **No PNGs, spritesheets, textures or other files from this pack are currently included in Neon Breakout.** Attribution is optional under CC0; included here to recognize Kenney's work.
+
+- **MasterJimo — Star Swarm**  
+  Original project: https://github.com/MasterJimo/Star-Swarm  
+  **Usage status:** Reference for Neon Breakout's neon colour palette. No Star Swarm image assets are imported.
+
+- **Neon Breakout game art and VFX:** Brick glow, lightning-orb power-ups, particle shards, rings, trails, paddle, background, mini-icons and in-game UI are **drawn procedurally with HTML, CSS, SVG and JavaScript Canvas**. The approved concept/mockup guided the appearance; it is not shipped as a gameplay texture.
+
+### Sound effects — generated in the game
+
+- **Source:** `game.js` (Web Audio API).
+- **Usage status:** Paddle bounces, brick collisions, pickups, transitions and other arcade cues are **synthesized in code**, not taken from an external SFX pack.
+- **Third-party audio files:** None for SFX; the Eric Matyas track above is the only external audio asset currently referenced.
+
+### Attribution notes
+
+**CC BY 3.0** requires crediting the composer and supplying the source/license links above. **CC0 1.0** does not require attribution, but Kenney is acknowledged as a creative reference. Those licenses apply to their respective works; they do **not** imply that the entire Neon Breakout project is under CC0 or CC BY.
+
+The soundtrack uses the existing in-game speaker mute control (**M**) and separate 0–100% **SFX** and **Music** sliders. Volume preferences are remembered in your browser.
 
 **Break the bricks. Chase the high score.** ✦
