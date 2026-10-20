@@ -245,7 +245,8 @@
         bricks.push({
           x: ox + c * (bw + gapX), y: 105 + r * (bh + gapY),
           w: bw, h: bh, hp: heavy ? 2 : 1, maxHp: heavy ? 2 : 1,
-          color: PALETTES[r % PALETTES.length], flash: 0, row: r
+          color: [PALETTES[3], PALETTES[0], PALETTES[1], PALETTES[2],
+            PALETTES[4], PALETTES[5], PALETTES[6]][r], flash: 0, row: r
         });
       }
     }
@@ -625,183 +626,142 @@
   function drawBackground() {
     ctx.fillStyle = "#060d20";
     ctx.fillRect(0, 0, W, H);
-
-    const space = ctx.createRadialGradient(W * .5, H * .44, 20, W * .5, H * .44, 565);
-    space.addColorStop(0, "#152047");
-    space.addColorStop(.45, "#0a1430");
-    space.addColorStop(1, "#070d1e");
+    const space = ctx.createRadialGradient(W * .53, H * .42, 10, W * .5, H * .44, 660);
+    space.addColorStop(0, "#14254b");
+    space.addColorStop(.5, "#0a1530");
+    space.addColorStop(1, "#050b1d");
     ctx.fillStyle = space;
     ctx.fillRect(0, 0, W, H);
 
-    ctx.strokeStyle = "rgba(99, 138, 222, .068)";
+    // Technological grid — clearly visible but darker than the game objects.
+    ctx.strokeStyle = "rgba(61, 135, 236, .15)";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    for (let x = 36; x < W; x += 46) {
+    for (let x = 20; x <= W; x += 46) {
       ctx.moveTo(x + .5, 0); ctx.lineTo(x + .5, H);
     }
-    for (let y = 46; y < H; y += 46) {
+    for (let y = 40; y <= H; y += 46) {
       ctx.moveTo(0, y + .5); ctx.lineTo(W, y + .5);
     }
     ctx.stroke();
 
-    ctx.strokeStyle = "rgba(100, 166, 242, .055)";
-    for (const r of [155, 240, 333]) {
-      ctx.beginPath(); ctx.arc(W / 2, H * .5, r, 0, Math.PI * 2); ctx.stroke();
-    }
-
-    for (const s of stars) {
-      const alpha = .19 + .23 * (.5 + .5 * Math.sin(clock * s.speed * 2 + s.phase));
-      ctx.fillStyle = "rgba(162, 202, 255, " + alpha + ")";
-      ctx.fillRect(s.x, s.y, s.size, s.size);
-    }
-
-    const haloLeft = ctx.createLinearGradient(0, 0, 58, 0);
-    haloLeft.addColorStop(0, "rgba(37, 198, 255, .12)");
-    haloLeft.addColorStop(1, "rgba(37, 198, 255, 0)");
-    ctx.fillStyle = haloLeft; ctx.fillRect(0, 40, 58, H - 40);
-    const haloRight = ctx.createLinearGradient(W, 0, W - 58, 0);
-    haloRight.addColorStop(0, "rgba(183, 88, 255, .12)");
-    haloRight.addColorStop(1, "rgba(183, 88, 255, 0)");
-    ctx.fillStyle = haloRight; ctx.fillRect(W - 58, 40, 58, H - 40);
-
-    ctx.strokeStyle = "rgba(114, 162, 254, .3)";
+    // Subtle perspective lines ground the paddle in the cyber grid.
+    ctx.strokeStyle = "rgba(38, 116, 215, .13)";
     ctx.beginPath();
-    ctx.moveTo(20, 41); ctx.lineTo(20, H - 29);
-    ctx.moveTo(W - 20, 41); ctx.lineTo(W - 20, H - 29);
+    for (let x = 50; x < W; x += 120) {
+      ctx.moveTo(W / 2 + (x - W / 2) * .25, H * .61);
+      ctx.lineTo(x, H);
+    }
     ctx.stroke();
 
-    const floor = ctx.createLinearGradient(0, H - 48, 0, H);
-    floor.addColorStop(0, "rgba(62, 169, 255, 0)");
-    floor.addColorStop(1, "rgba(62, 169, 255, .055)");
-    ctx.fillStyle = floor; ctx.fillRect(20, H - 48, W - 40, 48);
+    for (const star of stars) {
+      const alpha = .19 + .35 * (.5 + .5 * Math.sin(clock * star.speed * 2 + star.phase));
+      ctx.fillStyle = "rgba(116, 220, 255," + alpha + ")";
+      ctx.fillRect(star.x, star.y, star.size, star.size);
+    }
 
-    ctx.strokeStyle = "rgba(74, 200, 250, .17)";
-    ctx.beginPath(); ctx.moveTo(30, H - 29); ctx.lineTo(W - 30, H - 29); ctx.stroke();
+    // Arc reactor glow behind the playfield, matching the concept artwork.
+    const center = ctx.createRadialGradient(W * .52, H * .46, 100, W * .52, H * .46, 420);
+    center.addColorStop(0, "rgba(0,185,245,.026)");
+    center.addColorStop(.7, "rgba(19,97,229,.06)");
+    center.addColorStop(1, "rgba(18,40,91,0)");
+    ctx.fillStyle = center;
+    ctx.fillRect(0, 0, W, H);
 
+    // Two electric-blue rails frame the play area.
+    ctx.save();
+    ctx.strokeStyle = "#41cfff";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "#22ccff";
+    ctx.shadowBlur = 21;
+    ctx.beginPath();
+    ctx.moveTo(19, TOP); ctx.lineTo(19, H - 21);
+    ctx.moveTo(W - 19, TOP); ctx.lineTo(W - 19, H - 21);
+    ctx.moveTo(19, H - 21); ctx.lineTo(W - 19, H - 21);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle = "rgba(15,175,249,.07)";
+    ctx.fillRect(20, H - 34, W - 40, 14);
+    ctx.strokeStyle = "rgba(60,190,255,.14)";
+    ctx.beginPath(); ctx.moveTo(20, TOP);ctx.lineTo(W - 20, TOP);ctx.stroke();
   }
 
   function drawBricks() {
     for (const b of bricks) {
       if (b.hp <= 0) continue;
-      if (b.powerupType) {
-        // Hollow glass + luminous outline; unlike ordinary solid neon bricks.
-        const accent = { W: "#7cf5ff", M: "#ff73b7", S: "#f7ad50" }[b.powerupType];
-        const pulse = .73 + .19 * Math.sin(clock * 3.1 + b.x * .025);
-        const cx = b.x + b.w / 2;
-        const cy = b.y + b.h / 2;
-        ctx.save();
-        ctx.shadowColor = accent;
-        ctx.shadowBlur = 30 + 14 * pulse;
-        ctx.fillStyle = "rgba(6, 13, 30, .74)";
-        ctx.strokeStyle = accent;
-        ctx.lineWidth = 3.1;
-        rr(b.x + 1.5, b.y + 1.5, b.w - 3, b.h - 3, 4);
-        ctx.fill();
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = .55;
-        ctx.lineWidth = .85;
-        rr(b.x + 5, b.y + 5, b.w - 10, b.h - 10, 2);
-        ctx.stroke();
-        ctx.globalAlpha = pulse;
-        ctx.fillStyle = accent;
-        ctx.shadowColor = accent;
-        ctx.shadowBlur = 10;
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - 7);
-        ctx.lineTo(cx + 7, cy);
-        ctx.lineTo(cx, cy + 7);
-        ctx.lineTo(cx - 7, cy);
-        ctx.closePath();
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = "#10182c";
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - 3.5);
-        ctx.lineTo(cx + 3.5, cy);
-        ctx.lineTo(cx, cy + 3.5);
-        ctx.lineTo(cx - 3.5, cy);
-        ctx.closePath();
-        ctx.fill();
-        if (b.flash > 0) {
-        ctx.globalAlpha = Math.min(1, b.flash * 7.5);
-        ctx.shadowColor = "#ffffff";
-        ctx.shadowBlur = 18;
-        ctx.fillStyle = "#ffffff";
-        rr(b.x - 1, b.y - 1, b.w + 2, b.h + 2, 4);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
-        ctx.restore();
-        continue;
-      }
+      const appear = Math.max(0, Math.min(1, (stageReveal - b.row * .11) / .28));
+      if (appear <= 0) continue;
+      const damaged = b.maxHp === 2 && b.hp === 1;
+      const color = b.powerupType
+        ? ({ W: "#67f6ff", M: "#ff77d2", S: "#ffc96b" })[b.powerupType]
+        : b.color;
       ctx.save();
-      // Opaque vivid body + bloom, matching the ship colors in Star Swarm.
-      // Two-hit bricks stay bright, with a visible reinforcing inset.
-      const faded = b.maxHp === 2 && b.hp === 1;
-      ctx.globalAlpha = faded ? .76 : 1;
-      ctx.shadowColor = b.color;
-      ctx.shadowBlur = faded ? 28 : 52;
-      ctx.fillStyle = b.color;
+      ctx.globalAlpha = appear * (damaged ? .76 : 1);
+      // Saturated dark glass center rather than a flat solid rectangle.
+      ctx.fillStyle = "#0c1a35";
       rr(b.x, b.y, b.w, b.h, 4);
       ctx.fill();
-      // A soft saturated halo outside the crisp neon face.
-      ctx.shadowBlur = faded ? 18 : 30;
-      ctx.globalAlpha = faded ? .13 : .21;
-      rr(b.x - 1, b.y - 1, b.w + 2, b.h + 2, 5);
-      ctx.fill();
-      ctx.globalAlpha = faded ? .76 : 1;
-
-      // A soft beveled glass face keeps the brick saturated, not dark/empty.
-      ctx.shadowBlur = 0;
-      const sheen = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
-      sheen.addColorStop(0, "rgba(255,255,255,.78)");
-      sheen.addColorStop(.18, "rgba(255,255,255,.26)");
-      sheen.addColorStop(.5, "rgba(255,255,255,.06)");
-      sheen.addColorStop(1, "rgba(7,13,38,.18)");
-      ctx.fillStyle = sheen;
+      const glass = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
+      glass.addColorStop(0, color);
+      glass.addColorStop(.18, "rgba(42,95,148,.58)");
+      glass.addColorStop(.5, "rgba(15,31,69,.84)");
+      glass.addColorStop(1, "rgba(5,15,40,.95)");
+      ctx.fillStyle = glass;
+      ctx.globalAlpha = appear * (b.powerupType ? .24 : .67);
       rr(b.x + 1, b.y + 1, b.w - 2, b.h - 2, 3);
       ctx.fill();
 
-      // Crisp hot-neon border plus a second smaller emission pass.
-      ctx.strokeStyle = b.color;
-      ctx.shadowColor = b.color;
-      ctx.shadowBlur = faded ? 14 : 24;
-      ctx.lineWidth = 2.1;
-      rr(b.x + 1.5, b.y + 1.5, b.w - 3, b.h - 3, 3);
+      // Hot neon tube outline with layered glow and white lens highlight.
+      ctx.globalAlpha = appear;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = b.powerupType ? 2.6 : 2.35;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = b.powerupType ? 32 : 23;
+      rr(b.x + 1.2, b.y + 1.2, b.w - 2.4, b.h - 2.4, 4);
       ctx.stroke();
       ctx.shadowBlur = 0;
-      ctx.strokeStyle = "rgba(255,255,255,.88)";
-      ctx.shadowColor = "rgba(255,255,255,.45)";
-      ctx.shadowBlur = 8;
-      ctx.lineWidth = .9;
-      rr(b.x + 3.5, b.y + 3.5, b.w - 7, b.h - 7, 2.5);
+      ctx.strokeStyle = "rgba(220,250,255,.62)";
+      ctx.lineWidth = .85;
+      rr(b.x + 3.3, b.y + 3.3, b.w - 6.6, b.h - 6.6, 2.6);
       ctx.stroke();
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = "rgba(255,255,255,.82)";
-      rr(b.x + 7, b.y + 3, b.w - 14, 2, 1);
+
+      ctx.fillStyle = "rgba(255,255,255,.50)";
+      rr(b.x + 8, b.y + 3.5, b.w - 16, 1.6, 1);
       ctx.fill();
-      ctx.fillStyle = "rgba(8,14,38,.23)";
-      rr(b.x + 6, b.y + b.h - 5, b.w - 12, 2, 1);
-      ctx.fill();
-      if (b.maxHp === 2) {
-        // Armor is a subtle pair of bars, not the hollow bonus-brick border.
-        ctx.strokeStyle = "rgba(7,17,40,.55)";
-        ctx.lineWidth = 1.2;
-        rr(b.x + 6, b.y + 6, b.w - 12, b.h - 12, 2);
-        ctx.stroke();
-        ctx.fillStyle = "rgba(255,255,255,.85)";
-        ctx.fillRect(b.x + b.w / 2 - 9, b.y + 10, 7, 4);
-        ctx.fillRect(b.x + b.w / 2 + 2, b.y + 10, 7, 4);
-      }
-      if (b.flash > 0) {
-        ctx.globalAlpha = Math.min(1, b.flash * 7.5);
-        ctx.shadowColor = "#ffffff";
-        ctx.shadowBlur = 18;
-        ctx.fillStyle = "#ffffff";
-        rr(b.x - 1, b.y - 1, b.w + 2, b.h + 2, 4);
+
+      if (b.powerupType) {
+        // Outline-only reward brick; keep the center dark and add a power diamond.
+        const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+        const pulse = .86 + .14 * Math.sin(clock * 5 + b.x / 40);
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+        ctx.globalAlpha = appear * pulse;
+        ctx.beginPath();
+        ctx.moveTo(cx,cy-6);ctx.lineTo(cx+7,cy);
+        ctx.lineTo(cx,cy+6);ctx.lineTo(cx-7,cy);ctx.closePath();
         ctx.fill();
         ctx.shadowBlur = 0;
+        ctx.fillStyle = "#09132b";
+        ctx.beginPath();
+        ctx.moveTo(cx,cy-3);ctx.lineTo(cx+3.7,cy);
+        ctx.lineTo(cx,cy+3);ctx.lineTo(cx-3.7,cy);ctx.closePath();
+        ctx.fill();
+      } else if (b.maxHp === 2) {
+        // Reinforced bricks use a restrained internal armor glyph.
+        ctx.fillStyle = "rgba(240,254,255,.8)";
+        ctx.fillRect(b.x + b.w / 2 - 9, b.y + 9, 6, 4);
+        ctx.fillRect(b.x + b.w / 2 + 3, b.y + 9, 6, 4);
+      }
+
+      if (b.flash > 0) {
+        ctx.globalAlpha = appear * Math.min(1, b.flash * 6);
+        ctx.fillStyle = "#fff";
+        ctx.shadowColor = "#ffffff";
+        ctx.shadowBlur = 22;
+        rr(b.x - 1, b.y - 1, b.w + 2, b.h + 2, 4);
+        ctx.fill();
       }
       ctx.restore();
     }
