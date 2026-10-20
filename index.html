@@ -13,26 +13,7 @@
   <div class="ambient ambient-two" aria-hidden="true"></div>
 
   <div class="app">
-    <header class="site-header">
-      <div class="brand" aria-label="Neon Breakout">
-        <span class="brand-icon" aria-hidden="true"><span></span><span></span><span></span></span>
-        <span class="brand-copy"><strong>NEON<span class="brand-separator">/</span>BREAKOUT</strong><small>ARCADE DIVISION — 001</small></span>
-      </div>
-      <div class="header-actions">
-        <span class="online-status"><i></i> SYSTEM ONLINE</span>
-        <button id="soundButton" class="icon-button" type="button" aria-label="Mute sound" title="Toggle sound (M)">
-          <svg id="soundIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
-        </button>
-      </div>
-    </header>
-
-    <section class="intro">
-      <div class="eyebrow"><span class="eyebrow-line"></span> REBUILT FOR THE NEXT HIGH SCORE <span class="eyebrow-line"></span></div>
-      <h1>BREAK THE <em>LIMITS<span class="period">.</span></em></h1>
-      <p>Classic brick-breaking. Reimagined in neon. <span>One more round?</span></p>
-    </section>
-
-    <main class="machine" aria-label="Neon Breakout game">
+<main class="machine" aria-label="Neon Breakout game">
       <div class="machine-edge"></div>
       <div class="dashboard">
         <div class="stat stat-score"><span class="stat-label">SCORE</span><strong id="scoreValue" aria-live="polite">000000</strong></div>
@@ -42,6 +23,9 @@
         <div class="stat stat-lives"><span class="stat-label">LIVES REMAINING</span><div id="livesValue" class="lives" aria-label="3 lives">♥ ♥ ♥</div></div>
         <button id="pauseButton" class="pause-button" type="button" aria-label="Pause game" title="Pause (P / Esc)">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+        </button>
+        <button id="soundButton" class="icon-button" type="button" aria-label="Mute sound" title="Toggle sound (M)">
+          <svg id="soundIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
         </button>
       </div>
 
@@ -65,26 +49,29 @@
       </div>
 
       <div class="machine-bottom">
-        <div class="controls">
-          <span class="controls-title">HOW TO PLAY</span>
-          <span><kbd>←</kbd><kbd>→</kbd> or <kbd>A</kbd><kbd>D</kbd> <small>MOVE</small></span>
-          <span><kbd>SPACE</kbd> <small>LAUNCH</small></span>
-          <span><kbd>P</kbd> <small>PAUSE</small></span>
-          <span class="touch-instruction">ON MOBILE: DRAG TO MOVE · TAP TO LAUNCH</span>
+        <div class="instruction-row">
+          <div class="controls" aria-label="How to play">
+            <span class="controls-title">HOW TO PLAY</span>
+            <span class="desktop-instruction"><kbd>←</kbd><kbd>→</kbd> or <kbd>A</kbd><kbd>D</kbd> <small>MOVE</small></span>
+            <span class="desktop-instruction"><kbd>SPACE</kbd> <small>LAUNCH</small></span>
+            <span class="desktop-instruction"><kbd>P</kbd> <small>PAUSE</small></span>
+            <span class="touch-instruction">DRAG TO MOVE · TAP TO LAUNCH</span>
+          </div>
+          <div class="progress">
+            <span>SECTOR CLEARANCE</span>
+            <div class="progress-track"><div id="progressBar"></div></div>
+            <span id="progressText">0%</span>
+          </div>
         </div>
-        <div class="progress">
-          <span>SECTOR CLEARANCE</span>
-          <div class="progress-track"><div id="progressBar"></div></div>
-          <span id="progressText">0%</span>
+        <div class="powerup-row" aria-label="Available power-ups">
+          <span class="controls-title">POWER-UPS</span>
+          <span class="powerup-item"><b class="power wide">W</b> WIDE PADDLE</span>
+          <span class="powerup-item"><b class="power multi">M</b> MULTIBALL</span>
+          <span class="powerup-item"><b class="power slow">S</b> SLOW-MO</span>
         </div>
       </div>
     </main>
-
-    <footer class="footer">
-      <span><span class="footer-star">✦</span> POWER-UPS <b class="power wide">W</b> WIDE PADDLE <b class="power multi">M</b> MULTIBALL <b class="power slow">S</b> SLOW-MO</span>
-      <span>BUILT FOR THE LOVE OF ARCADE <span class="footer-star">✦</span></span>
-    </footer>
-  </div>
+</div>
 
   <script src="game.js" defer></script>
 </body>
