@@ -21,6 +21,16 @@ A neon arcade brick-breaker. Keep the ball in play, destroy every brick and beat
 | Mute/unmute all sound | **M** | Speaker button |
 | Adjust SFX and music | **SFX / Music sliders** in the top bar | Same sliders |
 
+## ⚡ Neon FX
+
+- Glowing glass bricks with cyan, pink, amber and other electric colours.
+- **Brick hit:** quick neon sparks, diamond-shaped fragments and impact rings.
+- **Brick destroyed:** bigger bursts, luminous shards and brief cyber HUD callouts.
+- **Power-ups:** glowing electric orbs, trailing sparks and a pickup pulse.
+- **Sector clear:** an expanding energy shockwave, confetti and a neon scan revealing the next endless wave.
+
+All visual effects are generated directly in Canvas and do not require external image assets.
+
 ## ✨ Power-ups
 
 **Hollow, glowing-outline bricks contain a guaranteed power-up.** Break one, then catch the falling bonus with your paddle.
