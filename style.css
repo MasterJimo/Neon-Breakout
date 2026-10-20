@@ -532,3 +532,66 @@ body { overflow-x: hidden; }
   .volume-heading { font-size: 8px; }
   .volume-control output { font-size: 9px; }
 }
+
+/* Power-up legend miniatures: exact lightning-orb motif from Canvas pickups */
+.compact-powerups .powerup-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.legend-orb {
+  --orb-color: #61f4ff;
+  display: inline-flex;
+  position: relative;
+  flex: 0 0 23px;
+  width: 23px;
+  height: 23px;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+.legend-orb.multi { --orb-color: #ff6bd1; }
+.legend-orb.slow { --orb-color: #ffc262; }
+.legend-orb svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 5px var(--orb-color));
+}
+.legend-orb .orb-halo {
+  fill: rgba(8, 16, 39, .2);
+  stroke: var(--orb-color);
+  stroke-width: 3.2;
+}
+.legend-orb .orb-core {
+  fill: #0e1932;
+  stroke: rgba(255,255,255,.36);
+  stroke-width: .7;
+}
+.legend-orb .orb-lightning {
+  fill: #ffe49d;
+  filter: drop-shadow(0 0 2px #ffe8a9);
+}
+.legend-brick {
+  width: 29px;
+  height: 21px;
+  display: inline-flex;
+  flex: 0 0 29px;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+.legend-brick svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 4px #5cfcff); }
+.legend-brick rect { fill: rgba(4, 12, 31, .55); stroke: #5cfcff; stroke-width: 2; }
+.legend-brick path { fill: #5cfcff; }
+.legend-brick .brick-diamond-center { fill: #09162c; }
+@container (max-width: 1000px) {
+  .legend-orb { width: 20px; height: 20px; flex-basis: 20px; }
+  .legend-brick { width: 26px; height: 19px; flex-basis: 26px; }
+  .compact-powerups .powerup-item { gap: 3px; }
+}
+@container (max-width: 800px) {
+  .legend-orb { width: 19px; height: 19px; flex-basis: 19px; }
+  .legend-brick { width: 24px; height: 18px; flex-basis: 24px; }
+}
