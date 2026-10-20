@@ -595,3 +595,21 @@ body { overflow-x: hidden; }
   .legend-orb { width: 19px; height: 19px; flex-basis: 19px; }
   .legend-brick { width: 24px; height: 18px; flex-basis: 24px; }
 }
+
+/* Sector status now belongs to the stage block in the top HUD. */
+.stats-group .stat-level { align-items: flex-start; gap: 3px; }
+.sector-label {
+  display: block;
+  color: #5eebff;
+  font: 800 8px/1.2 "Space Mono", "Consolas", monospace;
+  letter-spacing: .055em;
+  white-space: nowrap;
+  text-shadow: 0 0 10px rgba(61,231,255,.37);
+}
+@container (max-width: 1000px) {
+  .sector-label { font-size: 7px; letter-spacing: 0; }
+}
+@container (max-width: 580px) {
+  .stats-group { gap: 8px; }
+  .sector-label { font-size: 6px; letter-spacing: -.03em; }
+}
