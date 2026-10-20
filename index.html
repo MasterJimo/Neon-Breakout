@@ -16,17 +16,28 @@
 <main class="machine" aria-label="Neon Breakout game">
       <div class="machine-edge"></div>
       <div class="dashboard">
-        <div class="stat stat-score"><span class="stat-label">SCORE</span><strong id="scoreValue" aria-live="polite">000000</strong></div>
-        <div class="stat stat-best"><span class="stat-label">PERSONAL BEST</span><strong id="bestValue">000000</strong></div>
-        <div class="dash-divider"></div>
-        <div class="stat stat-level"><span class="stat-label">STAGE</span><strong><span id="levelValue">01</span><span class="stat-total"> / 03</span></strong></div>
-        <div class="stat stat-lives"><span class="stat-label">LIVES REMAINING</span><div id="livesValue" class="lives" aria-label="3 lives">♥ ♥ ♥</div></div>
-        <button id="pauseButton" class="pause-button" type="button" aria-label="Pause game" title="Pause (P / Esc)">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-        </button>
-        <button id="soundButton" class="icon-button" type="button" aria-label="Mute sound" title="Toggle sound (M)">
-          <svg id="soundIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
-        </button>
+        <div class="stats-group">
+          <div class="stat stat-score"><span class="stat-label">SCORE</span><strong id="scoreValue" aria-live="polite">000000</strong></div>
+          <div class="stat stat-best"><span class="stat-label">PERSONAL BEST</span><strong id="bestValue">000000</strong></div>
+          <div class="stat stat-level"><span class="stat-label">STAGE</span><strong id="levelValue">01</strong></div>
+          <div class="stat stat-lives"><span class="stat-label">LIVES REMAINING</span><div id="livesValue" class="lives" aria-label="3 lives">♥ ♥ ♥</div></div>
+        </div>
+        <div class="audio-toolbar">
+          <button id="pauseButton" class="pause-button" type="button" aria-label="Pause game" title="Pause (P / Esc)">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+          </button>
+          <label class="volume-control" for="sfxVolume">
+            <span class="volume-heading"><span class="volume-name"><span aria-hidden="true">◖))</span> SFX</span><output id="sfxPercent" for="sfxVolume">70%</output></span>
+            <input id="sfxVolume" aria-label="Sound effects volume" type="range" min="0" max="100" value="70" step="1">
+          </label>
+          <label class="volume-control" for="musicVolume">
+            <span class="volume-heading"><span class="volume-name"><span aria-hidden="true">♫</span> MUSIC</span><output id="musicPercent" for="musicVolume">35%</output></span>
+            <input id="musicVolume" aria-label="Music volume" type="range" min="0" max="100" value="35" step="1">
+          </label>
+          <button id="soundButton" class="icon-button" type="button" aria-label="Mute sound" title="Toggle all sound (M)">
+            <svg id="soundIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="playfield" id="playfield">
@@ -34,15 +45,14 @@
         <div class="stage-tag" aria-hidden="true"><span class="stage-dot"></span><span id="stageTag">SECTOR 01 · INITIALIZE</span></div>
         <div class="combo-pill" id="comboPill" aria-hidden="true"></div>
 
-        <div class="overlay" id="overlay">
+        <div class="overlay minimal-start" id="overlay">
           <div class="overlay-halo" aria-hidden="true"></div>
           <div class="overlay-panel">
-            <div class="panel-kicker"><span class="panel-marker"></span><span id="overlayKicker">WELCOME TO THE ARCADE</span></div>
-            <h2 id="overlayTitle">LIGHT IT <span>UP.</span></h2>
-            <p id="overlayDescription">Clear the neon bricks. Keep the ball alive.<br>Own the leaderboard.</p>
+            <div class="panel-kicker"><span class="panel-marker"></span><span id="overlayKicker"></span></div>
+            <h2 id="overlayTitle">LIGHT IT <span>UP</span></h2>
+            <p id="overlayDescription"></p>
             <div class="overlay-stats" id="overlayStats" hidden></div>
             <button class="primary-button" id="actionButton" type="button"><span id="actionText">START GAME</span><span aria-hidden="true">↗</span></button>
-            <div class="overlay-hint" id="overlayHint"><kbd>SPACE</kbd> TO LAUNCH <span class="dot-sep">·</span> <kbd>←</kbd> <kbd>→</kbd> TO MOVE</div>
           </div>
         </div>
         <div class="toast" id="toast" role="status" aria-live="polite"></div>
