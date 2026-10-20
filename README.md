@@ -1,46 +1,33 @@
 # ⚡ NEON BREAKOUT
 
-A modern, glowing brick-breaker you can play straight in your browser. Built with **vanilla JavaScript + Canvas**, CSS and HTML — no build step, packages or external game engine.
+A neon arcade brick-breaker. Keep the ball in play, destroy every brick and beat your high score!
 
-## 🎮 Play
+## 🎮 How to play
 
-Open **[index.html](./index.html)** in any modern browser. Move the paddle, bounce the ball and clear all **3 sectors** while keeping your lives.
+- Move the paddle to bounce the ball back toward the bricks.
+- Clear all **3 sectors** to win. You start with **3 lives**.
+- Hit bricks in quick succession to build a **combo** and earn more points.
+- Your **personal best** is saved in your browser.
 
-| Action | Keyboard / Mouse | Mobile |
+## 🕹️ Controls
+
+| Action | Keyboard & mouse | Touchscreen |
 | --- | --- | --- |
-| Move | **← / →** or **A / D**, or move mouse | Drag your finger |
-| Launch | **Space** or click playfield | Tap playfield |
+| Move paddle | **← / →**, **A / D**, or move the mouse left/right | Drag left/right |
+| Launch ball | **Space** or **left-click** the playfield | Tap the playfield |
 | Pause / resume | **P** or **Esc** | Pause button |
-| Sound on/off | **M** | Speaker button |
+| Toggle sound | **M** | Speaker button |
 
-### Features
-- Three stages with increasingly challenging brick layouts.
-- **Wide paddle**, **multiball**, and **slow motion** power-ups.
-- Score, personal best (saved in your browser), combos, lives and stage progress.
-- Neon particles, ball trails, screen shake and synthesized arcade sounds.
-- Responsive layout and touch controls.
+## ✨ Power-ups
 
-## 🚀 Publish with GitHub Pages
+**Hollow, glowing-outline bricks contain a guaranteed power-up.** Break one, then catch the falling bonus with your paddle.
 
-1. Open **Settings → Pages** in this repository.
-2. Set **Build and deployment** to **Deploy from a branch**.
-3. Choose **main** and **/(root)**, then click **Save**.
-4. Once GitHub Pages has published the site, play at `https://masterjimo.github.io/Neon-Breakout/`.
+| Bonus | Effect |
+| --- | --- |
+| **W — Wide Paddle** | A wider paddle for **12 seconds** |
+| **M — Multiball** | Splits the ball into extra balls |
+| **S — Slow-Mo** | Slows the balls for **9 seconds** |
 
-## 🛠 Local development
+Some later-sector bricks need **two hits** to break. Keep an eye on your remaining lives and sector progress!
 
-No setup needed. You can simply double-click `index.html`, or start a local server:
-
-```bash
-python3 -m http.server 8000
-```
-
-Then open `http://localhost:8000`.
-
-## Files
-
-- `index.html` — layout, HUD and menus
-- `style.css` — neon arcade styling and responsive layout
-- `game.js` — collision physics, levels, effects, sound and input
-
-Made for the high score chasers. ✦
+**Break the bricks. Chase the high score.** ✦
