@@ -171,6 +171,22 @@
         });
       }
     }
+    // Mark 1–2 non-armoured bricks per row. Each outlined brick contains a real,
+    // preassigned power-up; ordinary bricks never drop hidden random items.
+    const powerTypes = ["W", "M", "S"];
+    let powerIndex = 0;
+    for (let r = 0; r < rows; r++) {
+      const candidates = bricks.filter(b => b.row === r && b.maxHp === 1);
+      for (let i = candidates.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+      }
+      const picks = r % 2 === 0 ? 2 : 1;
+      for (const brick of candidates.slice(0, picks)) {
+        brick.powerupType = powerTypes[(powerIndex + level - 1) % powerTypes.length];
+        powerIndex++;
+      }
+    }
     initialBricks = bricks.length;
     balls = [];
     ballDocked = true;
@@ -335,7 +351,7 @@
       score += gained;
       if (score > best) saveBest();
       floating(brick.x + brick.w / 2, brick.y + 8, "+" + gained, brick.color);
-      if (Math.random() < .14) dropPowerup(brick);
+      if (brick.powerupType) dropPowerup(brick);
     } else {
       score += 25;
       floating(brick.x + brick.w / 2, brick.y + 8, "+25", "#d4e6ff");
@@ -344,8 +360,8 @@
   }
 
   function dropPowerup(brick) {
-    const types = ["W", "M", "S"];
-    const type = types[Math.floor(Math.random() * types.length)];
+    const type = brick.powerupType;
+    if (!type) return;
     powerups.push({ x: brick.x + brick.w / 2, y: brick.y + brick.h / 2,
       type, vy: 128, spin: Math.random() * 6 });
   }
@@ -569,6 +585,55 @@
   function drawBricks() {
     for (const b of bricks) {
       if (b.hp <= 0) continue;
+      if (b.powerupType) {
+        // Hollow glass + luminous outline; unlike ordinary solid neon bricks.
+        const accent = { W: "#4de5f3", M: "#d98aff", S: "#ffc979" }[b.powerupType];
+        const pulse = .73 + .19 * Math.sin(clock * 3.1 + b.x * .025);
+        const cx = b.x + b.w / 2;
+        const cy = b.y + b.h / 2;
+        ctx.save();
+        ctx.shadowColor = accent;
+        ctx.shadowBlur = 13 + 4 * pulse;
+        ctx.fillStyle = "rgba(6, 13, 30, .74)";
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 2.25;
+        rr(b.x + 1.5, b.y + 1.5, b.w - 3, b.h - 3, 4);
+        ctx.fill();
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = .55;
+        ctx.lineWidth = .85;
+        rr(b.x + 5, b.y + 5, b.w - 10, b.h - 10, 2);
+        ctx.stroke();
+        ctx.globalAlpha = pulse;
+        ctx.fillStyle = accent;
+        ctx.shadowColor = accent;
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - 7);
+        ctx.lineTo(cx + 7, cy);
+        ctx.lineTo(cx, cy + 7);
+        ctx.lineTo(cx - 7, cy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#10182c";
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - 3.5);
+        ctx.lineTo(cx + 3.5, cy);
+        ctx.lineTo(cx, cy + 3.5);
+        ctx.lineTo(cx - 3.5, cy);
+        ctx.closePath();
+        ctx.fill();
+        if (b.flash > 0) {
+          ctx.globalAlpha = Math.min(1, b.flash * 6);
+          ctx.fillStyle = "#ffffff";
+          rr(b.x, b.y, b.w, b.h, 4);
+          ctx.fill();
+        }
+        ctx.restore();
+        continue;
+      }
       ctx.save();
       const faded = b.maxHp === 2 && b.hp === 1;
       ctx.shadowColor = b.color;
