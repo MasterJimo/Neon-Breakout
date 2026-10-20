@@ -728,16 +728,21 @@
     ctx.shadowColor = "#22ccff";
     ctx.shadowBlur = 21;
     ctx.beginPath();
-    ctx.moveTo(19, TOP); ctx.lineTo(19, H - 21);
-    ctx.moveTo(W - 19, TOP); ctx.lineTo(W - 19, H - 21);
-    ctx.moveTo(19, H - 21); ctx.lineTo(W - 19, H - 21);
+    // A single glowing closed rectangle: top, sides and bottom use
+    // precisely the same line width, colour and bloom.
+    ctx.rect(19, TOP, W - 38, H - TOP - 21);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = "rgba(214,252,255,.42)";
+    ctx.lineWidth = .7;
+    ctx.beginPath();
+    ctx.rect(20.5, TOP + 1.5, W - 41, H - TOP - 24);
     ctx.stroke();
     ctx.restore();
 
     ctx.fillStyle = "rgba(15,175,249,.07)";
     ctx.fillRect(20, H - 34, W - 40, 14);
-    ctx.strokeStyle = "rgba(60,190,255,.14)";
-    ctx.beginPath(); ctx.moveTo(20, TOP);ctx.lineTo(W - 20, TOP);ctx.stroke();
+    // The former faint top guide is now the full bright top rail.
   }
 
 
@@ -765,71 +770,104 @@
     };
     const special = kind === "bonus";
 
-    // Large coloured aura is baked into the sprite instead of an expensive
-    // live shadow on every tile. This is what the mockup's bricks were missing.
+    // Reference-matched translucent neon: a substantial soft outer halo,
+    // coloured glass core, and bright milk-white edge. All baked once.
     p.save();
+    p.globalAlpha = special ? .35 : .56;
     p.fillStyle = color;
-    p.globalAlpha = special ? .18 : .36;
     p.shadowColor = color;
-    p.shadowBlur = 34;
+    p.shadowBlur = 43;
     shape(x, y, w, h, 5);
+    p.fill();
+    p.shadowBlur = 25;
+    p.globalAlpha = special ? .17 : .31;
+    shape(x - 1, y - 1, w + 2, h + 2, 6);
     p.fill();
     p.restore();
 
-    p.fillStyle = "#070f28";
+    const referenceFill = {
+      "#28caff": ["#159ae9", "#1676c8", "#163eaa"],
+      "#ff43ba": ["#f329bc", "#ce249d", "#791a81"],
+      "#ffb33d": ["#f8a331", "#d37e27", "#8e4225"],
+      "#2ce9cb": ["#25dbbe", "#189d9f", "#145b73"],
+      "#a37aff": ["#a273f5", "#7757ca", "#473084"],
+      "#54c9ff": ["#54ccf9", "#287fbf", "#1c468f"],
+      "#ff74bc": ["#f366b8", "#b63e9e", "#67256e"]
+    };
+    const shades = referenceFill[color] || [color, color, "#223b71"];
+
+    // Special rewards deliberately remain darker than ordinary bricks.
+    p.fillStyle = special ? "#07162f" : shades[2];
     shape(x, y, w, h, 5);
     p.fill();
-    p.save();
-    p.globalAlpha = special ? .20 : .86;
-    p.fillStyle = color;
-    shape(x + 1, y + 1, w - 2, h - 2, 4);
-    p.fill();
-    p.restore();
+    if (!special) {
+      const body = p.createLinearGradient(x, y, x + 2, y + h);
+      body.addColorStop(0, shades[0]);
+      body.addColorStop(.48, shades[1]);
+      body.addColorStop(1, shades[2]);
+      p.fillStyle = body;
+      shape(x + 1, y + 1, w - 2, h - 2, 4);
+      p.fill();
 
-    const glass = p.createLinearGradient(x, y, x, y + h);
-    glass.addColorStop(0, "rgba(255,255,255,.49)");
-    glass.addColorStop(.13, rgba(.22));
-    glass.addColorStop(.5, rgba(.06));
-    glass.addColorStop(1, "rgba(3,10,29,.55)");
-    p.fillStyle = glass;
-    shape(x + 1, y + 1, w - 2, h - 2, 4);
-    p.fill();
+      // Diffuse cyan/pink/gold internal glow: a vibrant painted core instead
+      // of the earlier opaque navy overlay that suppressed most colour.
+      const inner = p.createRadialGradient(x + w * .45, y + h * .12, 1,
+        x + w * .45, y + h * .42, w * .77);
+      inner.addColorStop(0, "rgba(255,255,255,.23)");
+      inner.addColorStop(.36, rgba(.11));
+      inner.addColorStop(1, rgba(0));
+      p.fillStyle = inner;
+      shape(x + 2, y + 2, w - 4, h - 4, 3);
+      p.fill();
 
-    const core = p.createRadialGradient(x + w / 2, y + h * .15, 1,
-      x + w / 2, y + h * .4, w * .66);
-    core.addColorStop(0, "rgba(255,255,255,.17)");
-    core.addColorStop(.5, rgba(.12));
-    core.addColorStop(1, rgba(0));
-    p.fillStyle = core;
-    shape(x + 2, y + 2, w - 4, h - 4, 3);
-    p.fill();
-
-    if (special) {
-      p.fillStyle = "rgba(4,12,31,.76)";
-      shape(x + 11, y + 6, w - 22, h - 12, 3);
+      const shade = p.createLinearGradient(x, y, x, y + h);
+      shade.addColorStop(0, "rgba(255,255,255,.10)");
+      shade.addColorStop(.36, "rgba(0,0,12,0)");
+      shade.addColorStop(1, "rgba(5,2,22,.29)");
+      p.fillStyle = shade;
+      shape(x + 2, y + 2, w - 4, h - 4, 3);
+      p.fill();
+    } else {
+      const innerSpecial = p.createLinearGradient(x, y, x, y+h);
+      innerSpecial.addColorStop(0, rgba(.31));
+      innerSpecial.addColorStop(.65, rgba(.10));
+      innerSpecial.addColorStop(1, "rgba(3,9,28,.65)");
+      p.fillStyle = innerSpecial;
+      shape(x + 2, y + 2, w - 4, h - 4, 3);
       p.fill();
     }
+
+    // Gentle translucent speckles make the glass less flat at close range.
+    p.save();
+    for (let i = 0; i < 5; i++) {
+      const px = x + 11 + ((i*23 + r) % Math.max(12,w-22));
+      const py = y + 6 + ((i*9 + b) % Math.max(9,h-12));
+      p.globalAlpha = special ? .12 : .22;
+      p.fillStyle = i%2 ? "rgba(255,255,255,.58)" : color;
+      p.beginPath();p.arc(px,py,i%3===0?.75:.48,0,Math.PI*2);p.fill();
+    }
+    p.restore();
 
     // Hot-colour double neon tube and crisp white-glass rim.
     p.save();
     p.strokeStyle = color;
     p.lineWidth = 3.2;
     p.shadowColor = color;
-    p.shadowBlur = 30;
+    p.shadowBlur = 37;
     shape(x + 1.5, y + 1.5, w - 3, h - 3, 4);
     p.stroke();
-    p.shadowBlur = 11;
-    p.lineWidth = 2.5;
+    p.shadowBlur = 15;
+    p.lineWidth = 2.8;
     shape(x + 1.5, y + 1.5, w - 3, h - 3, 4);
     p.stroke();
     p.restore();
 
     p.save();
     p.lineWidth = 1.05;
-    p.strokeStyle = "rgba(231,254,255,.82)";
+    p.strokeStyle = "rgba(245,255,255,.91)";
     shape(x + 3, y + 3, w - 6, h - 6, 3);
     p.stroke();
-    p.fillStyle = "rgba(255,255,255,.72)";
+    p.fillStyle = "rgba(255,255,255,.83)";
     shape(x + 9, y + 3.2, w - 18, 2, 1);
     p.fill();
     p.restore();
