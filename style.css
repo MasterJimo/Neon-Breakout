@@ -296,3 +296,7 @@ body { overflow-x: hidden; }
   .app { height: auto; min-height: 100dvh; }
   .machine { width: min(100%, 850px); }
 }
+
+/* Key for guaranteed power-up bricks in the bottom panel */
+.power.bonus { color: #83f5ff; border: 1px solid #83f5ff; box-shadow: 0 0 9px rgba(91,235,255,.28); font-size: 13px; }
+@media (max-width: 800px) { .powerup-row { gap: 8px 14px; } }
