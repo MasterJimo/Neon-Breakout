@@ -111,7 +111,7 @@ kbd { display: inline-grid; place-items: center; min-width: 23px; height: 23px; 
 .footer > span { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
 .footer-star { color: #48ddef; font-size: 15px; }
 .power { display: inline-grid; place-items: center; width: 17px; height: 17px; border-radius: 4px; font-size: 9px; border: 1px solid currentColor; }
-.power.wide { color: #4ce6fd; } .power.multi { color: #eb91ff; } .power.slow { color: #ffbc70; }
+.power.wide { color: #7cf5ff; } .power.multi { color: #ff73b7; } .power.slow { color: #f7ad50; }
 @media (max-width: 850px) {
   .dashboard { gap: 20px; padding: 12px 17px; }
   .stat { min-width: 0; } .stat strong { font-size: 20px; }
