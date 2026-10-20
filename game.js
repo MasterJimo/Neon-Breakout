@@ -65,6 +65,18 @@
     speed: .25 + Math.random() * .7
   }));
 
+  // Ambient cyber confetti is present even between impacts. Burst particles
+  // remain event-driven so real collisions still feel substantially brighter.
+  const ambientMotes = Array.from({ length: 48 }, (_, i) => ({
+    x: 40 + Math.random() * (W - 80),
+    y: TOP + 35 + Math.random() * (H - TOP - 90),
+    phase: Math.random() * Math.PI * 2,
+    speed: .35 + Math.random() * .85,
+    radius: .8 + Math.random() * 2.1,
+    color: ["#4feaff", "#ff53c1", "#ffc056", "#6affdf"][i % 4],
+    kind: i % 3
+  }));
+
   function loadBest() {
     try { return Number(localStorage.getItem("neon-breakout-best")) || 0; }
     catch { return 0; }
@@ -659,6 +671,47 @@
       ctx.fillStyle = "rgba(116, 220, 255," + alpha + ")";
       ctx.fillRect(star.x, star.y, star.size, star.size);
     }
+
+    // A faint permanent reactor arc makes the playfield feel powered up
+    // between collisions; sector-clear shockwaves are far brighter.
+    ctx.save();
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = .11 + .035 * Math.sin(clock * .8);
+    ctx.strokeStyle = "#49e9ff";
+    ctx.shadowColor = "#28ccff";
+    ctx.shadowBlur = 13;
+    ctx.beginPath();
+    ctx.arc(W * .52, H * .49, 265, -.92 * Math.PI, .54 * Math.PI);
+    ctx.stroke();
+    ctx.globalAlpha *= .7;
+    ctx.strokeStyle = "#ff56ca";
+    ctx.beginPath();
+    ctx.arc(W * .52, H * .49, 250, .08 * Math.PI, 1.12 * Math.PI);
+    ctx.stroke();
+    ctx.restore();
+
+    // Slow drifting squares, sparks and diamonds; low visual density.
+    ctx.save();
+    for (const mote of ambientMotes) {
+      const alpha = .22 + .38 * (.5 + .5 * Math.sin(clock * mote.speed * 2 + mote.phase));
+      const x = mote.x + Math.sin(clock * mote.speed + mote.phase) * 5;
+      const y = mote.y + Math.cos(clock * mote.speed * .7 + mote.phase) * 4;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = mote.color;
+      ctx.shadowColor = mote.color;
+      ctx.shadowBlur = 7;
+      const rad = mote.radius;
+      if (mote.kind === 0) ctx.fillRect(x, y, rad * 1.5, rad * 1.5);
+      else if (mote.kind === 1) {
+        ctx.beginPath();ctx.arc(x,y,rad*.75,0,Math.PI*2);ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(x,y-rad*2);ctx.lineTo(x+rad,y);
+        ctx.lineTo(x,y+rad*2);ctx.lineTo(x-rad,y);
+        ctx.closePath();ctx.fill();
+      }
+    }
+    ctx.restore();
 
     // Arc reactor glow behind the playfield, matching the concept artwork.
     const center = ctx.createRadialGradient(W * .52, H * .46, 100, W * .52, H * .46, 420);
