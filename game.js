@@ -5,7 +5,6 @@
   const H = 600;
   const TOP = 42;
   const MAX_SPEED = 705;
-  const LEVELS = 3;
   // Neon palette adapted from Star Swarm: hot pink, amber, mint, electric blue.
   const PALETTES = ["#ff73b7", "#f7ad50", "#43e0bf", "#49bfff", "#ab86ff", "#6bdcff", "#ff70bd"];
   const STAGES = ["INITIALIZE", "OVERDRIVE", "FINAL FREQUENCY"];
@@ -19,7 +18,8 @@
   const soundButton = $("soundButton");
   const musicTrack = $("musicTrack");
   // HTML audio is used for the licensed loop; Web Audio remains for arcade SFX.
-  musicTrack.volume = .28;
+  const sfxSlider = $("sfxVolume");
+  const musicSlider = $("musicVolume");
   const comboPill = $("comboPill");
   const toast = $("toast");
 
@@ -44,6 +44,8 @@
   let shake = 0;
   let toastTimer = 0;
   let muted = false;
+  let sfxVolume = readVolume("neon-breakout-sfx-volume", 70);
+  let musicVolume = readVolume("neon-breakout-music-volume", 35);
   let audio = null;
   const FRAME_MS = 1000 / 60; // Strict average rendering cap: 60 FPS on any refresh-rate display.
   let lastFrame = 0;
@@ -71,6 +73,35 @@
     }
   }
 
+  function readVolume(key, fallback) {
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved === null) return fallback;
+      const value = Number(saved);
+      return Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : fallback;
+    } catch { return fallback; }
+  }
+
+  function updateVolumes() {
+    musicTrack.volume = muted ? 0 : musicVolume / 100;
+    sfxSlider.value = String(sfxVolume);
+    musicSlider.value = String(musicVolume);
+    $("sfxPercent").textContent = sfxVolume + "%";
+    $("musicPercent").textContent = musicVolume + "%";
+    sfxSlider.style.setProperty("--fill", sfxVolume + "%");
+    musicSlider.style.setProperty("--fill", musicVolume + "%");
+    document.querySelector(".audio-toolbar")?.classList.toggle("master-muted", muted);
+  }
+
+  function setVolume(which, value) {
+    const level = Math.round(Math.max(0, Math.min(100, Number(value) || 0)));
+    if (which === "sfx") sfxVolume = level;
+    else musicVolume = level;
+    try { localStorage.setItem("neon-breakout-" + which + "-volume", String(level)); } catch {}
+    updateVolumes();
+    if (which === "music" && level > 0 && !muted && state === "playing") playMusic();
+  }
+
   function num(n) { return String(n).padStart(6, "0"); }
 
   function hud() {
@@ -80,7 +111,7 @@
     $("livesValue").innerHTML = Array.from({ length: 3 }, (_, i) =>
       i < lives ? "<span>♥</span>" : '<span class="lost">♥</span>').join("");
     $("livesValue").setAttribute("aria-label", lives + " lives remaining");
-    $("stageTag").textContent = "SECTOR " + String(level).padStart(2, "0") + " · " + STAGES[level - 1];
+    $("stageTag").textContent = "SECTOR " + String(level).padStart(2, "0") + " · " + STAGES[(level - 1) % STAGES.length];
     const remaining = bricks.filter(b => b.hp > 0).length;
     const percent = initialBricks ? Math.round(100 * (initialBricks - remaining) / initialBricks) : 0;
     $("progressBar").style.width = percent + "%";
@@ -102,6 +133,7 @@
     $("overlayStats").hidden = !stats;
     $("overlayStats").innerHTML = stats || "";
     action = handler;
+    overlay.classList.toggle("minimal-start", handler === start);
     overlay.hidden = false;
   }
 
@@ -114,7 +146,7 @@
   }
 
   function sound(frequency, duration = .07, type = "sine", volume = .04, endFrequency) {
-    if (muted) return;
+    if (muted || sfxVolume <= 0) return;
     try {
       if (!audio) {
         const Audio = window.AudioContext || window.webkitAudioContext;
@@ -128,7 +160,7 @@
       osc.type = type;
       osc.frequency.setValueAtTime(frequency, time);
       if (endFrequency) osc.frequency.exponentialRampToValueAtTime(Math.max(30, endFrequency), time + duration);
-      gain.gain.setValueAtTime(volume, time);
+      gain.gain.setValueAtTime(Math.max(.0001, volume * sfxVolume / 100), time);
       gain.gain.exponentialRampToValueAtTime(.0001, time + duration);
       osc.connect(gain);
       gain.connect(audio.destination);
@@ -138,7 +170,7 @@
   }
 
   function playMusic() {
-    if (muted || !["playing", "interlude"].includes(state)) return;
+    if (muted || musicVolume <= 0 || !["playing", "interlude"].includes(state)) return;
     const playing = musicTrack.play();
     if (playing && typeof playing.catch === "function") {
       // Playback can fail offline or when the browser hasn't granted audio.
@@ -174,15 +206,17 @@
   function createLevel() {
     bricks = [];
     const cols = 12;
-    const rows = level === 1 ? 5 : level === 2 ? 6 : 7;
+    const phase = ((level - 1) % 3) + 1;
+    const rows = phase === 1 ? 5 : phase === 2 ? 6 : 7;
     const bw = 61, bh = 24, gapX = 9, gapY = 12;
     const ox = (W - cols * bw - (cols - 1) * gapX) / 2;
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        if (level === 2 && (r === 2 || r === 3) && (c === 0 || c === 11)) continue;
-        if (level === 3 && ((r === 1 && (c === 0 || c === 11)) ||
+        if (phase === 2 && (r === 2 || r === 3) && (c === 0 || c === 11)) continue;
+        if (phase === 3 && ((r === 1 && (c === 0 || c === 11)) ||
           (r === 3 && (c === 0 || c === 1 || c === 10 || c === 11)))) continue;
-        const heavy = level > 1 && (r + 2 * c + level) % (level === 3 ? 5 : 8) === 0;
+        const armorFrequency = Math.max(4, phase === 3 ? 6 - Math.floor(level / 6) : 9 - Math.floor(level / 4));
+        const heavy = level > 1 && (r + 2 * c + level) % armorFrequency === 0;
         bricks.push({
           x: ox + c * (bw + gapX), y: 105 + r * (bh + gapY),
           w: bw, h: bh, hp: heavy ? 2 : 1, maxHp: heavy ? 2 : 1,
@@ -257,49 +291,33 @@
     createLevel();
     state = "playing";
     hideOverlay();
-    say("SECTOR " + String(level).padStart(2, "0") + " · READY", 2);
+    say("SECTOR " + String(level).padStart(2, "0") + " · READY · LAUNCH!", 2);
     hud();
   }
 
-  function finish(won) {
+  function finish() {
     pauseMusic();
     saveBest();
-    state = won ? "won" : "lost";
+    state = "lost";
     ballDocked = true;
     combo = 0;
-    if (won) {
-      fireworks(W / 2, H / 2, "#4de5f3", 100);
-      sound(620, .18, "triangle", .07, 990);
-      setOverlay("MISSION COMPLETE", 'YOU ARE <span>LEGEND.</span>',
-        "Every brick. Every sector. Absolutely demolished.",
-        "PLAY AGAIN", start,
-        '<span>FINAL SCORE<strong>' + num(score) + '</strong></span><span>PERSONAL BEST<strong>' + num(best) + '</strong></span>');
-    } else {
-      sound(230, .38, "sawtooth", .03, 90);
-      setOverlay("SIGNAL LOST", 'GAME <span>OVER.</span>',
-        "The neon never dies. Neither does your next attempt.",
-        "TRY AGAIN", start,
-        '<span>YOUR SCORE<strong>' + num(score) + '</strong></span><span>PERSONAL BEST<strong>' + num(best) + '</strong></span>');
-    }
+    sound(230, .38, "sawtooth", .03, 90);
+    setOverlay("SIGNAL LOST", 'GAME <span>OVER</span>',
+      "Your run is over. Beat that high score next time!",
+      "TRY AGAIN", start,
+      '<span>YOUR SCORE<strong>' + num(score) + '</strong></span><span>PERSONAL BEST<strong>' + num(best) + '</strong></span>');
     hud();
   }
 
   function clearLevel() {
     if (state !== "playing") return;
+    const bonus = 500 + Math.min(level - 1, 50) * 100;
+    score += bonus;
     saveBest();
     sound(620, .24, "triangle", .05, 970);
-    if (level >= LEVELS) {
-      score += lives * 500;
-      finish(true);
-      return;
-    }
-    score += 500;
     state = "interlude";
-    interludeTimer = 2.4;
-    setOverlay("SECTOR " + String(level).padStart(2, "0") + " COMPLETE",
-      'SECTOR <span>CLEARED.</span>',
-      "Bonus +500 · The next wave is charging.",
-      "NEXT SECTOR", nextLevel);
+    interludeTimer = 1.1;
+    say("SECTOR " + String(level).padStart(2, "0") + " CLEARED · +" + bonus, 1.1);
     hud();
   }
 
@@ -307,7 +325,7 @@
     lives--;
     combo = 0;
     if (lives <= 0) {
-      finish(false);
+      finish();
       return;
     }
     paddle.w = 118;
@@ -945,6 +963,7 @@
   function toggleSound() {
     muted = !muted;
     musicTrack.muted = muted;
+    updateVolumes();
     if (muted) pauseMusic();
     else playMusic();
     soundButton.classList.toggle("muted", muted);
@@ -956,6 +975,10 @@
     if (!muted) sound(770, .09, "sine", .045);
   }
 
+  sfxSlider.addEventListener("input", () => setVolume("sfx", sfxSlider.value));
+  musicSlider.addEventListener("input", () => setVolume("music", musicSlider.value));
+  updateVolumes();
+
   actionButton.addEventListener("click", () => { if (action) action(); });
   pauseButton.addEventListener("click", pause);
   soundButton.addEventListener("click", toggleSound);
@@ -963,9 +986,7 @@
 
   resize();
   createLevel();
-  setOverlay("WELCOME TO THE ARCADE", 'LIGHT IT <span>UP.</span>',
-    "Clear the neon bricks. Keep the ball alive.<br>Own the leaderboard.",
-    "START GAME", start);
+  setOverlay("", 'LIGHT IT <span>UP</span>', "", "START GAME", start);
   hud();
   requestAnimationFrame(frame);
 })();
