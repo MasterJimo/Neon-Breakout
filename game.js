@@ -779,6 +779,19 @@
       rr(x + 2, y + 2, w - 4, h - 4, 3);
       ctx.fill();
 
+      // Additive light is the missing difference vs. a static mockup:
+      // neon tubes emit coloured light rather than just receiving a drop shadow.
+      // Keep power-up bricks hollow enough to remain identifiable.
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = appear * (special ? .055 : damaged ? .12 : .20);
+      ctx.fillStyle = color;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 31;
+      rr(x + 3, y + 3, w - 6, h - 6, 3);
+      ctx.fill();
+      ctx.restore();
+
       // A bright luminous rim, a narrower hot-white rim and an upper light bar.
       ctx.strokeStyle = color;
       ctx.shadowColor = color;
