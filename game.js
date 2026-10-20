@@ -45,7 +45,7 @@
   let toastTimer = 0;
   let muted = false;
   let sfxVolume = readVolume("neon-breakout-sfx-volume", 70);
-  let musicVolume = readVolume("neon-breakout-music-volume", 35);
+  let musicVolume = readVolume("neon-breakout-music-volume", 3);
   let audio = null;
   const FRAME_MS = 1000 / 60; // Strict average rendering cap: 60 FPS on any refresh-rate display.
   let lastFrame = 0;
