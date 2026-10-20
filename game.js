@@ -57,7 +57,7 @@
   let pointerActive = false;
   const keys = new Set();
 
-  const paddle = { x: W / 2, y: 544, w: 118, h: 15, target: W / 2, wideTimer: 0 };
+  const paddle = { x: W / 2, y: 544, w: 144, h: 15, target: W / 2, wideTimer: 0 };
   const stars = Array.from({ length: 82 }, () => ({
     x: Math.random() * W, y: Math.random() * H,
     size: .5 + Math.random() * 1.5,
@@ -208,7 +208,7 @@
     level = 1;
     combo = 0;
     slowTimer = 0;
-    paddle.w = 118;
+    paddle.w = 144;
     paddle.wideTimer = 0;
     paddle.target = W / 2;
     paddle.x = W / 2;
@@ -274,7 +274,7 @@
     comboTimeout = 0;
     slowTimer = 0;
     paddle.wideTimer = 0;
-    paddle.w = 118;
+    paddle.w = 144;
     spawnBall();
     stageReveal = level === 1 ? 2 : 0;
     hud();
@@ -363,7 +363,7 @@
       finish();
       return;
     }
-    paddle.w = 118;
+    paddle.w = 144;
     paddle.wideTimer = 0;
     slowTimer = 0;
     powerups = [];
@@ -471,7 +471,7 @@
   function takePowerup(type) {
     if (type === "W") {
       paddle.wideTimer = 12;
-      paddle.w = 190;
+      paddle.w = 215;
       say("WIDE PADDLE · 12 SECONDS");
     } else if (type === "M") {
       const existing = balls.filter(b => b.vx || b.vy);
@@ -575,7 +575,7 @@
     if (comboTimeout === 0 && combo > 0) { combo = 0; hud(); }
 
     paddle.wideTimer = Math.max(0, paddle.wideTimer - dt);
-    if (paddle.wideTimer === 0 && paddle.w !== 118) paddle.w = 118;
+    if (paddle.wideTimer === 0 && paddle.w !== 144) paddle.w = 144;
     slowTimer = Math.max(0, slowTimer - dt);
 
     if (!pointerActive) {
@@ -770,26 +770,28 @@
   function drawPaddle() {
     const x = paddle.x - paddle.w / 2, y = paddle.y;
     ctx.save();
-    const g = ctx.createLinearGradient(x, 0, x + paddle.w, 0);
-    g.addColorStop(0, "#3c84ff");
-    g.addColorStop(.24, "#65ecff");
-    g.addColorStop(.54, "#e1ffff");
-    g.addColorStop(.78, "#65ecff");
-    g.addColorStop(1, "#4f90ff");
-    ctx.shadowColor = "#45e7ff";
-    ctx.shadowBlur = 24;
-    ctx.fillStyle = g;
-    rr(x, y, paddle.w, paddle.h, 7);
+    // Long cyber-glass paddle with a bright tube edge and reflected glow.
+    const glass = ctx.createLinearGradient(x, y, x, y + paddle.h);
+    glass.addColorStop(0, "#e1ffff");
+    glass.addColorStop(.2, "#55f4ff");
+    glass.addColorStop(.62, "#187dd7");
+    glass.addColorStop(1, "#0b327d");
+    ctx.shadowColor = "#2beeff";
+    ctx.shadowBlur = 29;
+    ctx.fillStyle = glass;
+    rr(x, y, paddle.w, paddle.h, 8);
     ctx.fill();
+    ctx.shadowBlur = 13;
+    ctx.strokeStyle = "#b9ffff";
+    ctx.lineWidth = 2.5;
+    rr(x + 1, y + 1, paddle.w - 2, paddle.h - 2, 7);
+    ctx.stroke();
     ctx.shadowBlur = 0;
-    ctx.fillStyle = "rgba(255, 255, 255, .7)";
-    rr(x + 13, y + 2, paddle.w - 26, 3, 1.5);
+    ctx.fillStyle = "#ffffff";
+    rr(x + 9, y + 2.8, paddle.w - 18, 2.2, 2);
     ctx.fill();
-    ctx.fillStyle = "#b9faff";
-    rr(x + paddle.w / 2 - 12, y + 5, 24, 5, 2);
-    ctx.fill();
-    ctx.fillStyle = "rgba(53, 223, 255, .1)";
-    rr(x - 13, y + 17, paddle.w + 26, 5, 2);
+    ctx.fillStyle = "rgba(61,223,255,.12)";
+    rr(x - 10, y + 16, paddle.w + 20, 8, 3);
     ctx.fill();
     ctx.restore();
 
@@ -810,84 +812,189 @@
       ctx.save();
       for (let i = 0; i < b.trail.length; i++) {
         const t = b.trail[i];
-        const alpha = (i / b.trail.length) * .28;
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = "#5ceaff";
+        const fraction = (i + 1) / b.trail.length;
+        ctx.globalAlpha = fraction * .32;
+        ctx.fillStyle = "#47deff";
         ctx.beginPath();
-        ctx.arc(t.x, t.y, b.r * (.3 + .65 * i / b.trail.length), 0, Math.PI * 2);
+        ctx.arc(t.x, t.y, Math.max(.8, b.r * fraction * .95), 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
-      ctx.shadowColor = "#81f2ff";
-      ctx.shadowBlur = 29;
-      ctx.fillStyle = "#9cf5ff";
-      ctx.beginPath();
-      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-      ctx.fill();
+      const glow = ctx.createRadialGradient(b.x, b.y, 1, b.x, b.y, 24);
+      glow.addColorStop(0, "rgba(255,255,255,.72)");
+      glow.addColorStop(.28, "rgba(115,252,255,.35)");
+      glow.addColorStop(1, "rgba(25,201,255,0)");
+      ctx.fillStyle = glow;
+      ctx.beginPath();ctx.arc(b.x, b.y, 24, 0, Math.PI * 2);ctx.fill();
+      ctx.fillStyle = "#edffff";
+      ctx.shadowColor = "#60ecff";
+      ctx.shadowBlur = 25;
+      ctx.beginPath();ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);ctx.fill();
+      ctx.fillStyle = "#fff";
       ctx.shadowBlur = 0;
-      ctx.fillStyle = "#ffffff";
-      ctx.beginPath();
-      ctx.arc(b.x - 1.7, b.y - 2, b.r * .46, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath();ctx.arc(b.x - 2, b.y - 2, b.r * .52, 0, Math.PI * 2);ctx.fill();
       ctx.restore();
     }
   }
 
   function drawPowerups() {
-    const colors = { W: "#7cf5ff", M: "#ff73b7", S: "#f7ad50" };
+    const colors = { W: "#60f4ff", M: "#ff6bd1", S: "#ffc262" };
     for (const p of powerups) {
       const color = colors[p.type];
+      const pulse = .9 + .1 * Math.sin(clock * 9 + p.spin);
       ctx.save();
       ctx.translate(p.x, p.y);
-      ctx.rotate(Math.sin(p.spin) * .14);
+      // Falling gold and aqua energy motes.
+      for (let i = 0; i < 9; i++) {
+        const phase = (clock * 2 + i * .71) % 2;
+        const yy = 10 + phase * 23;
+        const xx = Math.sin(i * 6.1 + clock * 3) * (12 + i * 2);
+        ctx.globalAlpha = (1 - phase / 2) * .7;
+        ctx.fillStyle = i % 3 === 0 ? "#fff8d2" : color;
+        ctx.fillRect(xx, yy, i % 2 ? 2 : 3, i % 2 ? 2 : 4);
+      }
+      ctx.globalAlpha = 1;
       ctx.shadowColor = color;
-      ctx.shadowBlur = 20;
-      ctx.fillStyle = "#0e1930";
+      ctx.shadowBlur = 27;
       ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
-      rr(-16, -15, 32, 30, 7);
-      ctx.fill(); ctx.stroke();
+      ctx.lineWidth = 3;
+      ctx.beginPath();ctx.arc(0, 0, 19 * pulse, 0, Math.PI * 2);ctx.stroke();
+      const body = ctx.createRadialGradient(-3, -6, 1, 0, 0, 17);
+      body.addColorStop(0, "#364964");
+      body.addColorStop(.55, "#111b38");
+      body.addColorStop(1, "#08112b");
       ctx.shadowBlur = 0;
-      ctx.fillStyle = color;
+      ctx.fillStyle = body;
+      ctx.beginPath();ctx.arc(0, 0, 15, 0, Math.PI * 2);ctx.fill();
+      // Stylized lightning core, recalling the mockup's collectible energy orb.
+      ctx.shadowColor = color;ctx.shadowBlur = 14;
+      ctx.fillStyle = "#ffeba8";
+      ctx.beginPath();
+      ctx.moveTo(3, -13);ctx.lineTo(-7, -1);ctx.lineTo(-1, -1);
+      ctx.lineTo(-4, 12);ctx.lineTo(9, -4);ctx.lineTo(3, -4);
+      ctx.closePath();ctx.fill();
+      ctx.shadowBlur = 0;
+      // Small unobtrusive badge disambiguates W / M / S for gameplay.
+      ctx.font = '900 10px "Segoe UI",sans-serif';
       ctx.textAlign = "center";
-      ctx.font = 'bold 17px "Segoe UI", sans-serif';
-      ctx.fillText(p.type, 0, 6);
+      ctx.fillStyle = "#fff";
+      ctx.fillText(p.type, 0, 30);
       ctx.restore();
     }
   }
 
   function drawEffects(dt) {
+    // Geometry-shard VFX with short streaks, diamonds and dots.
     for (const p of particles) {
-      p.x += p.vx * dt; p.y += p.vy * dt;
-      p.vx *= Math.pow(.984, dt * 60);
-      p.vy = p.vy * Math.pow(.984, dt * 60) + 65 * dt;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vx *= Math.pow(.983, dt * 60);
+      p.vy = p.vy * Math.pow(.983, dt * 60) + 70 * dt;
+      p.rotation += p.spin * dt;
       p.life -= dt;
       if (p.life <= 0) continue;
-      ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation || 0);
+      ctx.globalAlpha = Math.min(1, p.life / p.maxLife);
       ctx.fillStyle = p.color;
-      ctx.shadowBlur = 7;
       ctx.shadowColor = p.color;
-      ctx.fillRect(p.x, p.y, p.size, p.size);
+      ctx.shadowBlur = p.kind === 3 ? 11 : 8;
+      const r = p.size;
+      if (p.kind === 0) {
+        ctx.fillRect(-r/2, -r/2, r, r); // glowing pixel shard
+      } else if (p.kind === 1) {
+        ctx.beginPath();
+        ctx.moveTo(0,-r*1.15);ctx.lineTo(r*.85,r*.85);ctx.lineTo(-r*.85,r*.85);
+        ctx.closePath();ctx.fill();
+      } else if (p.kind === 2) {
+        ctx.beginPath();ctx.arc(0,0,r*.48,0,Math.PI*2);ctx.fill();
+      } else {
+        ctx.fillRect(-r*.4,-r*2.1,r*.8,r*4.2); // long spark streak
+      }
+      ctx.restore();
     }
-    ctx.shadowBlur = 0;
-    ctx.globalAlpha = 1;
-    particles = particles.filter(p => p.life > 0);
+    particles = particles.filter(p=>p.life>0);
 
-    ctx.font = '900 16px "Segoe UI", sans-serif';
+    for (const wave of shockwaves) {
+      wave.life -= dt;
+      if (wave.life <= 0) continue;
+      const progress = 1 - wave.life / wave.maxLife;
+      const eased = 1 - Math.pow(1 - progress, 2);
+      const radius = wave.startRadius + (wave.endRadius - wave.startRadius) * eased;
+      ctx.save();
+      ctx.globalAlpha = Math.pow(1 - progress, .85) * .9;
+      ctx.strokeStyle = wave.color;
+      ctx.shadowColor = wave.color;
+      ctx.shadowBlur = Math.min(30, wave.width * 5);
+      ctx.lineWidth = Math.max(.8, wave.width * (1 - progress * .68));
+      ctx.beginPath();ctx.arc(wave.x,wave.y,radius,0,Math.PI*2);ctx.stroke();
+      // A second quieter ring sells the energy pulse without hiding the bricks.
+      if (wave.width > 3) {
+        ctx.globalAlpha *= .24;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();ctx.arc(wave.x,wave.y,radius+12,0,Math.PI*2);ctx.stroke();
+      }
+      ctx.restore();
+    }
+    shockwaves = shockwaves.filter(w=>w.life>0);
+
+    // Minimal cyber-interface leader lines, visible only during events.
+    for (const label of callouts) {
+      label.life -= dt;
+      if (label.life <= 0) continue;
+      const opacity = Math.min(1, label.life / .2, (label.maxLife - label.life) / .14);
+      const x=label.x,y=label.y;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0,opacity);
+      ctx.strokeStyle = label.color;
+      ctx.fillStyle = label.color;
+      ctx.shadowColor = label.color;
+      ctx.shadowBlur = 6;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();ctx.moveTo(x-25,y+21);ctx.lineTo(x-11,y+5);ctx.lineTo(x+78,y+5);ctx.stroke();
+      ctx.beginPath();ctx.arc(x-25,y+21,2.7,0,Math.PI*2);ctx.fill();
+      ctx.shadowBlur = 4;
+      ctx.font = '800 12px "Segoe UI",sans-serif';
+      ctx.textAlign = "left";
+      ctx.fillText(label.text,x,y-2);
+      ctx.restore();
+    }
+    callouts = callouts.filter(l=>l.life>0);
+
+    // New sector arrives as a bright horizontal scanner.
+    if (stageReveal < 1.25 && state === "playing") {
+      const scanY = 92 + stageReveal * 195;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0,.35*(1-stageReveal/1.25));
+      ctx.shadowColor = "#56dcff";ctx.shadowBlur = 20;
+      ctx.strokeStyle = "#80eeff";ctx.lineWidth = 2;
+      ctx.beginPath();ctx.moveTo(52,scanY);ctx.lineTo(W-52,scanY);ctx.stroke();
+      ctx.restore();
+    }
+
+    if (worldFlash > 0) {
+      worldFlash = Math.max(0, worldFlash - dt * 1.25);
+      ctx.save();
+      ctx.globalAlpha = worldFlash * .16;
+      ctx.fillStyle = "#80ecff";
+      ctx.fillRect(20,TOP,W-40,H-TOP-20);
+      ctx.restore();
+    }
+
+    ctx.save();
+    ctx.font = '900 15px "Segoe UI",sans-serif';
     ctx.textAlign = "center";
     for (const f of floaters) {
-      f.y -= 36 * dt;
+      f.y -= 40*dt;
       f.life -= dt;
-      ctx.globalAlpha = Math.max(0, f.life / f.maxLife);
+      ctx.globalAlpha = Math.max(0,f.life/f.maxLife);
       ctx.fillStyle = f.color;
-      ctx.shadowColor = f.color;
-      ctx.shadowBlur = 10;
-      ctx.fillText(f.text, f.x, f.y);
+      ctx.shadowColor = f.color;ctx.shadowBlur = 9;
+      ctx.fillText(f.text,f.x,f.y);
     }
-    ctx.shadowBlur = 0;
-    ctx.globalAlpha = 1;
-    ctx.textAlign = "left";
-    floaters = floaters.filter(f => f.life > 0);
+    ctx.restore();
+    floaters = floaters.filter(f=>f.life>0);
   }
 
   function render(dt) {
@@ -918,6 +1025,7 @@
     if (timestamp - nextFrameAt > FRAME_MS * 2) nextFrameAt = timestamp + FRAME_MS;
 
     clock += dt;
+    if (state === "playing") stageReveal = Math.min(2, stageReveal + dt);
     shake *= Math.pow(.76, dt * 60);
     for (const brick of bricks) brick.flash = Math.max(0, brick.flash - dt);
     if (toastTimer > 0) {
