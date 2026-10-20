@@ -608,10 +608,10 @@
         const cy = b.y + b.h / 2;
         ctx.save();
         ctx.shadowColor = accent;
-        ctx.shadowBlur = 22 + 9 * pulse;
+        ctx.shadowBlur = 30 + 14 * pulse;
         ctx.fillStyle = "rgba(6, 13, 30, .74)";
         ctx.strokeStyle = accent;
-        ctx.lineWidth = 2.7;
+        ctx.lineWidth = 3.1;
         rr(b.x + 1.5, b.y + 1.5, b.w - 3, b.h - 3, 4);
         ctx.fill();
         ctx.stroke();
@@ -641,11 +641,14 @@
         ctx.closePath();
         ctx.fill();
         if (b.flash > 0) {
-          ctx.globalAlpha = Math.min(1, b.flash * 6);
-          ctx.fillStyle = "#ffffff";
-          rr(b.x, b.y, b.w, b.h, 4);
-          ctx.fill();
-        }
+        ctx.globalAlpha = Math.min(1, b.flash * 7.5);
+        ctx.shadowColor = "#ffffff";
+        ctx.shadowBlur = 18;
+        ctx.fillStyle = "#ffffff";
+        rr(b.x - 1, b.y - 1, b.w + 2, b.h + 2, 4);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
         ctx.restore();
         continue;
       }
@@ -653,20 +656,26 @@
       // Opaque vivid body + bloom, matching the ship colors in Star Swarm.
       // Two-hit bricks stay bright, with a visible reinforcing inset.
       const faded = b.maxHp === 2 && b.hp === 1;
-      ctx.globalAlpha = faded ? .67 : 1;
+      ctx.globalAlpha = faded ? .76 : 1;
       ctx.shadowColor = b.color;
-      ctx.shadowBlur = faded ? 20 : 38;
+      ctx.shadowBlur = faded ? 28 : 52;
       ctx.fillStyle = b.color;
       rr(b.x, b.y, b.w, b.h, 4);
       ctx.fill();
+      // A soft saturated halo outside the crisp neon face.
+      ctx.shadowBlur = faded ? 18 : 30;
+      ctx.globalAlpha = faded ? .13 : .21;
+      rr(b.x - 1, b.y - 1, b.w + 2, b.h + 2, 5);
+      ctx.fill();
+      ctx.globalAlpha = faded ? .76 : 1;
 
       // A soft beveled glass face keeps the brick saturated, not dark/empty.
       ctx.shadowBlur = 0;
       const sheen = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
-      sheen.addColorStop(0, "rgba(255,255,255,.52)");
-      sheen.addColorStop(.22, "rgba(255,255,255,.12)");
-      sheen.addColorStop(.64, "rgba(255,255,255,0)");
-      sheen.addColorStop(1, "rgba(7,13,38,.28)");
+      sheen.addColorStop(0, "rgba(255,255,255,.78)");
+      sheen.addColorStop(.18, "rgba(255,255,255,.26)");
+      sheen.addColorStop(.5, "rgba(255,255,255,.06)");
+      sheen.addColorStop(1, "rgba(7,13,38,.18)");
       ctx.fillStyle = sheen;
       rr(b.x + 1, b.y + 1, b.w - 2, b.h - 2, 3);
       ctx.fill();
@@ -674,15 +683,18 @@
       // Crisp hot-neon border plus a second smaller emission pass.
       ctx.strokeStyle = b.color;
       ctx.shadowColor = b.color;
-      ctx.shadowBlur = faded ? 9 : 16;
-      ctx.lineWidth = 1.7;
+      ctx.shadowBlur = faded ? 14 : 24;
+      ctx.lineWidth = 2.1;
       rr(b.x + 1.5, b.y + 1.5, b.w - 3, b.h - 3, 3);
       ctx.stroke();
       ctx.shadowBlur = 0;
-      ctx.strokeStyle = "rgba(255,255,255,.75)";
-      ctx.lineWidth = 1;
-      rr(b.x + 1.5, b.y + 1.5, b.w - 3, b.h - 3, 3);
+      ctx.strokeStyle = "rgba(255,255,255,.88)";
+      ctx.shadowColor = "rgba(255,255,255,.45)";
+      ctx.shadowBlur = 8;
+      ctx.lineWidth = .9;
+      rr(b.x + 3.5, b.y + 3.5, b.w - 7, b.h - 7, 2.5);
       ctx.stroke();
+      ctx.shadowBlur = 0;
       ctx.fillStyle = "rgba(255,255,255,.82)";
       rr(b.x + 7, b.y + 3, b.w - 14, 2, 1);
       ctx.fill();
@@ -700,10 +712,13 @@
         ctx.fillRect(b.x + b.w / 2 + 2, b.y + 10, 7, 4);
       }
       if (b.flash > 0) {
-        ctx.globalAlpha = Math.min(1, b.flash * 6);
+        ctx.globalAlpha = Math.min(1, b.flash * 7.5);
+        ctx.shadowColor = "#ffffff";
+        ctx.shadowBlur = 18;
         ctx.fillStyle = "#ffffff";
-        rr(b.x, b.y, b.w, b.h, 4);
+        rr(b.x - 1, b.y - 1, b.w + 2, b.h + 2, 4);
         ctx.fill();
+        ctx.shadowBlur = 0;
       }
       ctx.restore();
     }
