@@ -17,6 +17,9 @@
   const actionButton = $("actionButton");
   const pauseButton = $("pauseButton");
   const soundButton = $("soundButton");
+  const musicTrack = $("musicTrack");
+  // HTML audio is used for the licensed loop; Web Audio remains for arcade SFX.
+  musicTrack.volume = .28;
   const comboPill = $("comboPill");
   const toast = $("toast");
 
@@ -134,6 +137,17 @@
     } catch { /* audio is optional */ }
   }
 
+  function playMusic() {
+    if (muted || !["playing", "interlude"].includes(state)) return;
+    const playing = musicTrack.play();
+    if (playing && typeof playing.catch === "function") {
+      // Playback can fail offline or when the browser hasn't granted audio.
+      playing.catch(() => {});
+    }
+  }
+
+  function pauseMusic() { musicTrack.pause(); }
+
   function start() {
     score = 0;
     lives = 3;
@@ -150,6 +164,8 @@
     createLevel();
     state = "playing";
     hideOverlay();
+    musicTrack.currentTime = 0;
+    playMusic();
     say("SPACE OR TAP TO LAUNCH", 2.3);
     sound(440, .12, "triangle", .055, 660);
     hud();
@@ -221,6 +237,7 @@
   function pause() {
     if (state === "playing") {
       state = "paused";
+      pauseMusic();
       setOverlay("GAME ON HOLD", 'TAKE A <span>BREATH.</span>',
         "The bricks will be right here when you return.", "RESUME GAME", resume);
       hud();
@@ -230,6 +247,7 @@
   function resume() {
     state = "playing";
     hideOverlay();
+    playMusic();
     hud();
   }
 
@@ -244,6 +262,7 @@
   }
 
   function finish(won) {
+    pauseMusic();
     saveBest();
     state = won ? "won" : "lost";
     ballDocked = true;
@@ -589,10 +608,10 @@
         const cy = b.y + b.h / 2;
         ctx.save();
         ctx.shadowColor = accent;
-        ctx.shadowBlur = 13 + 4 * pulse;
+        ctx.shadowBlur = 22 + 9 * pulse;
         ctx.fillStyle = "rgba(6, 13, 30, .74)";
         ctx.strokeStyle = accent;
-        ctx.lineWidth = 2.25;
+        ctx.lineWidth = 2.7;
         rr(b.x + 1.5, b.y + 1.5, b.w - 3, b.h - 3, 4);
         ctx.fill();
         ctx.stroke();
@@ -636,7 +655,7 @@
       const faded = b.maxHp === 2 && b.hp === 1;
       ctx.globalAlpha = faded ? .67 : 1;
       ctx.shadowColor = b.color;
-      ctx.shadowBlur = faded ? 12 : 23;
+      ctx.shadowBlur = faded ? 20 : 38;
       ctx.fillStyle = b.color;
       rr(b.x, b.y, b.w, b.h, 4);
       ctx.fill();
@@ -652,11 +671,19 @@
       rr(b.x + 1, b.y + 1, b.w - 2, b.h - 2, 3);
       ctx.fill();
 
-      ctx.strokeStyle = "rgba(255,255,255,.58)";
+      // Crisp hot-neon border plus a second smaller emission pass.
+      ctx.strokeStyle = b.color;
+      ctx.shadowColor = b.color;
+      ctx.shadowBlur = faded ? 9 : 16;
+      ctx.lineWidth = 1.7;
+      rr(b.x + 1.5, b.y + 1.5, b.w - 3, b.h - 3, 3);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = "rgba(255,255,255,.75)";
       ctx.lineWidth = 1;
       rr(b.x + 1.5, b.y + 1.5, b.w - 3, b.h - 3, 3);
       ctx.stroke();
-      ctx.fillStyle = "rgba(255,255,255,.63)";
+      ctx.fillStyle = "rgba(255,255,255,.82)";
       rr(b.x + 7, b.y + 3, b.w - 14, 2, 1);
       ctx.fill();
       ctx.fillStyle = "rgba(8,14,38,.23)";
@@ -902,6 +929,9 @@
 
   function toggleSound() {
     muted = !muted;
+    musicTrack.muted = muted;
+    if (muted) pauseMusic();
+    else playMusic();
     soundButton.classList.toggle("muted", muted);
     soundButton.setAttribute("aria-label", muted ? "Unmute sound" : "Mute sound");
     soundButton.title = muted ? "Unmute sound (M)" : "Mute sound (M)";
