@@ -740,110 +740,160 @@
     ctx.beginPath(); ctx.moveTo(20, TOP);ctx.lineTo(W - 20, TOP);ctx.stroke();
   }
 
+
+  // Draw the expensive bloom once into cached, transparent 2× sprites.
+  // The canvas only composites those sprites during gameplay, so five or more
+  // rows of intense neon light remain cheap at the 60 FPS render cap.
+  const neonBrickSprites = new Map();
+  const NEON_BRICK_PAD = 40;
+  function getNeonBrickSprite(color, kind, w, h) {
+    const key = color + ":" + kind + ":" + w + "x" + h;
+    if (neonBrickSprites.has(key)) return neonBrickSprites.get(key);
+    const scale = 2, pad = NEON_BRICK_PAD;
+    const tile = document.createElement("canvas");
+    tile.width = (w + pad * 2) * scale;
+    tile.height = (h + pad * 2) * scale;
+    const p = tile.getContext("2d");
+    if (!p) return null;
+    p.scale(scale, scale);
+    const x = pad, y = pad;
+    const [r, g, b] = [1, 3, 5].map(i => parseInt(color.slice(i, i + 2), 16));
+    const rgba = a => "rgba(" + r + "," + g + "," + b + "," + a + ")";
+    const shape = (sx, sy, sw, sh, radius) => {
+      p.beginPath();
+      p.roundRect(sx, sy, sw, sh, radius);
+    };
+    const special = kind === "bonus";
+
+    // Large coloured aura is baked into the sprite instead of an expensive
+    // live shadow on every tile. This is what the mockup's bricks were missing.
+    p.save();
+    p.fillStyle = color;
+    p.globalAlpha = special ? .18 : .36;
+    p.shadowColor = color;
+    p.shadowBlur = 34;
+    shape(x, y, w, h, 5);
+    p.fill();
+    p.restore();
+
+    p.fillStyle = "#070f28";
+    shape(x, y, w, h, 5);
+    p.fill();
+    p.save();
+    p.globalAlpha = special ? .20 : .86;
+    p.fillStyle = color;
+    shape(x + 1, y + 1, w - 2, h - 2, 4);
+    p.fill();
+    p.restore();
+
+    const glass = p.createLinearGradient(x, y, x, y + h);
+    glass.addColorStop(0, "rgba(255,255,255,.49)");
+    glass.addColorStop(.13, rgba(.22));
+    glass.addColorStop(.5, rgba(.06));
+    glass.addColorStop(1, "rgba(3,10,29,.55)");
+    p.fillStyle = glass;
+    shape(x + 1, y + 1, w - 2, h - 2, 4);
+    p.fill();
+
+    const core = p.createRadialGradient(x + w / 2, y + h * .15, 1,
+      x + w / 2, y + h * .4, w * .66);
+    core.addColorStop(0, "rgba(255,255,255,.17)");
+    core.addColorStop(.5, rgba(.12));
+    core.addColorStop(1, rgba(0));
+    p.fillStyle = core;
+    shape(x + 2, y + 2, w - 4, h - 4, 3);
+    p.fill();
+
+    if (special) {
+      p.fillStyle = "rgba(4,12,31,.76)";
+      shape(x + 11, y + 6, w - 22, h - 12, 3);
+      p.fill();
+    }
+
+    // Hot-colour double neon tube and crisp white-glass rim.
+    p.save();
+    p.strokeStyle = color;
+    p.lineWidth = 3.2;
+    p.shadowColor = color;
+    p.shadowBlur = 30;
+    shape(x + 1.5, y + 1.5, w - 3, h - 3, 4);
+    p.stroke();
+    p.shadowBlur = 11;
+    p.lineWidth = 2.5;
+    shape(x + 1.5, y + 1.5, w - 3, h - 3, 4);
+    p.stroke();
+    p.restore();
+
+    p.save();
+    p.lineWidth = 1.05;
+    p.strokeStyle = "rgba(231,254,255,.82)";
+    shape(x + 3, y + 3, w - 6, h - 6, 3);
+    p.stroke();
+    p.fillStyle = "rgba(255,255,255,.72)";
+    shape(x + 9, y + 3.2, w - 18, 2, 1);
+    p.fill();
+    p.restore();
+
+    if (special) {
+      const cx = x + w / 2, cy = y + h / 2;
+      p.save();
+      p.fillStyle = color;
+      p.shadowColor = color;
+      p.shadowBlur = 12;
+      p.beginPath();
+      p.moveTo(cx,cy - 7);p.lineTo(cx + 8,cy);
+      p.lineTo(cx,cy + 7);p.lineTo(cx - 8,cy);
+      p.closePath();p.fill();
+      p.shadowBlur = 0;
+      p.fillStyle = "#07122b";
+      p.beginPath();
+      p.moveTo(cx,cy - 3.5);p.lineTo(cx + 4,cy);
+      p.lineTo(cx,cy + 3.5);p.lineTo(cx - 4,cy);
+      p.closePath();p.fill();
+      p.restore();
+    }
+    neonBrickSprites.set(key, tile);
+    return tile;
+  }
+
   function drawBricks() {
-    for (const b of bricks) {
-      if (b.hp <= 0) continue;
-      const appear = Math.max(0, Math.min(1, (stageReveal - b.row * .11) / .28));
+    for (const brick of bricks) {
+      if (brick.hp <= 0) continue;
+      const appear = Math.max(0, Math.min(1,
+        (stageReveal - brick.row * .11) / .28));
       if (appear <= 0) continue;
-      const special = Boolean(b.powerupType);
-      const damaged = b.maxHp === 2 && b.hp === 1;
+      const type = brick.powerupType;
+      const special = Boolean(type);
       const color = special
-        ? ({ W: "#5cfcff", M: "#ff68dd", S: "#ffcb4d" })[b.powerupType]
-        : b.color;
-      const x = b.x, y = b.y, w = b.w, h = b.h;
+        ? ({ W: "#5cfcff", M: "#ff68dd", S: "#ffcb4d" })[type]
+        : brick.color;
+      const sprite = getNeonBrickSprite(
+        color, special ? "bonus" : "normal", brick.w, brick.h);
       ctx.save();
-      ctx.globalAlpha = appear;
-
-      // Large, diffuse physical glow behind every tile; the old dark-grey
-      // interior made the bricks look unlit in comparison with the mockup.
-      ctx.shadowColor = color;
-      ctx.shadowBlur = special ? 40 : 44;
-      ctx.fillStyle = color;
-      ctx.globalAlpha = appear * (special ? .19 : .34);
-      rr(x - 1, y - 1, w + 2, h + 2, 5);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-
-      // True saturated neon glass fill. Only bonus tiles stay visibly hollow.
-      ctx.globalAlpha = appear * (special ? .17 : damaged ? .53 : .77);
-      ctx.fillStyle = color;
-      rr(x, y, w, h, 5);
-      ctx.fill();
-      ctx.globalAlpha = appear;
-      const lens = ctx.createLinearGradient(x, y, x, y + h);
-      lens.addColorStop(0, "rgba(255,255,255,.55)");
-      lens.addColorStop(.18, "rgba(255,255,255,.16)");
-      lens.addColorStop(.50, "rgba(255,255,255,.035)");
-      lens.addColorStop(1, special ? "rgba(4,8,28,.15)" : "rgba(1,4,23,.27)");
-      ctx.fillStyle = lens;
-      rr(x + 2, y + 2, w - 4, h - 4, 3);
-      ctx.fill();
-
-      // Additive light is the missing difference vs. a static mockup:
-      // neon tubes emit coloured light rather than just receiving a drop shadow.
-      // Keep power-up bricks hollow enough to remain identifiable.
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";
-      ctx.globalAlpha = appear * (special ? .055 : damaged ? .12 : .20);
-      ctx.fillStyle = color;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 31;
-      rr(x + 3, y + 3, w - 6, h - 6, 3);
-      ctx.fill();
-      ctx.restore();
-
-      // A bright luminous rim, a narrower hot-white rim and an upper light bar.
-      ctx.strokeStyle = color;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 33;
-      ctx.lineWidth = special ? 3.5 : 3.25;
-      rr(x + 1.3, y + 1.3, w - 2.6, h - 2.6, 4);
-      ctx.stroke();
-      ctx.shadowBlur = 10;
-      ctx.strokeStyle = special ? "rgba(241,255,255,.93)" : "rgba(255,255,255,.77)";
-      ctx.lineWidth = 1.05;
-      rr(x + 3.2, y + 3.2, w - 6.4, h - 6.4, 3);
-      ctx.stroke();
-      ctx.shadowBlur = 4;
-      ctx.fillStyle = "rgba(255,255,255,.82)";
-      rr(x + 8, y + 3, w - 16, 2.2, 1.1);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-
-      if (special) {
-        // Marked power-up tile stays recognizable in the brighter formation.
-        // Dark central window and a pulsing diamond without changing drop logic.
-        ctx.globalAlpha = appear * .68;
-        ctx.fillStyle = "rgba(3,9,32,.60)";
-        rr(x + 10, y + 7, w - 20, h - 14, 3);
-        ctx.fill();
-        const cx = x + w/2, cy = y + h/2;
-        ctx.globalAlpha = appear * (.77 + .23*Math.sin(clock*5 + x*.018));
+      ctx.globalAlpha = appear * (brick.maxHp === 2 && brick.hp === 1 ? .73 : 1);
+      if (sprite) {
+        ctx.drawImage(sprite, brick.x - NEON_BRICK_PAD, brick.y - NEON_BRICK_PAD,
+          brick.w + 2 * NEON_BRICK_PAD, brick.h + 2 * NEON_BRICK_PAD);
+      } else {
         ctx.fillStyle = color;
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 17;
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - 7);ctx.lineTo(cx + 8,cy);
-        ctx.lineTo(cx,cy + 7);ctx.lineTo(cx - 8,cy);
-        ctx.closePath();ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = "#06152c";
-        ctx.beginPath();
-        ctx.moveTo(cx,cy - 3.1);ctx.lineTo(cx + 3.8,cy);
-        ctx.lineTo(cx,cy + 3.1);ctx.lineTo(cx - 3.8,cy);
-        ctx.closePath();ctx.fill();
-      } else if (b.maxHp === 2) {
-        ctx.globalAlpha = appear * .9;
-        ctx.fillStyle = "rgba(255,255,255,.91)";
-        ctx.fillRect(x+w/2-9, y+10, 6, 4);
-        ctx.fillRect(x+w/2+3, y+10, 6, 4);
+        rr(brick.x, brick.y, brick.w, brick.h, 4);ctx.fill();
       }
 
-      if (b.flash > 0) {
-        ctx.globalAlpha = appear * Math.min(1, b.flash * 8);
-        ctx.shadowColor = "#ffffff"; ctx.shadowBlur = 26;
-        ctx.fillStyle = "#ffffff";
-        rr(x-2,y-2,w+4,h+4,5); ctx.fill();
+      if (brick.maxHp === 2 && !special) {
+        ctx.fillStyle = "rgba(255,255,255,.9)";
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 5;
+        ctx.fillRect(brick.x + brick.w / 2 - 9, brick.y + 10, 6, 4);
+        ctx.fillRect(brick.x + brick.w / 2 + 3, brick.y + 10, 6, 4);
+      }
+
+      if (brick.flash > 0) {
+        ctx.globalAlpha = appear * Math.min(1, brick.flash * 8);
+        ctx.fillStyle = "#fff";
+        ctx.shadowColor = "#fff";
+        ctx.shadowBlur = 23;
+        rr(brick.x - 2, brick.y - 2, brick.w + 4, brick.h + 4, 5);
+        ctx.fill();
       }
       ctx.restore();
     }
