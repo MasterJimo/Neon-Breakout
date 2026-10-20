@@ -45,7 +45,7 @@
   let toastTimer = 0;
   let muted = false;
   let sfxVolume = readVolume("neon-breakout-sfx-volume", 70);
-  let musicVolume = readVolume("neon-breakout-music-volume", 3);
+  let musicVolume = readInitialMusicVolume();
   let audio = null;
   const FRAME_MS = 1000 / 60; // Strict average rendering cap: 60 FPS on any refresh-rate display.
   let lastFrame = 0;
@@ -71,6 +71,24 @@
       best = score;
       try { localStorage.setItem("neon-breakout-best", String(best)); } catch { /* storage disabled */ }
     }
+  }
+
+  function readInitialMusicVolume() {
+    // One-time migration: players with older saved values (e.g. 8%) should
+    // see the newly requested 3% default after the update. Future slider
+    // changes are still remembered normally.
+    const versionKey = "neon-breakout-music-default-3-migrated-v1";
+    try {
+      if (localStorage.getItem(versionKey) !== "yes") {
+        localStorage.setItem("neon-breakout-music-volume", "3");
+        localStorage.setItem(versionKey, "yes");
+        return 3;
+      }
+    } catch {
+      // Storage may be disabled; still show the intended initial volume.
+      return 3;
+    }
+    return readVolume("neon-breakout-music-volume", 3);
   }
 
   function readVolume(key, fallback) {
