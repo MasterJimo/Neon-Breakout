@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How to play Neon Breakout — controls, paddle power-ups, combos, and stages.">
+  <meta name="theme-color" content="#070b17">
+  <title>About & how to play — Neon Breakout</title>
+  <style>
+  :root{color-scheme:dark;--bg:#050814;--panel:#0c1328;--line:#425477;--text:#eff5ff;--muted:#b7c7e4;--cyan:#72e7fa;--pink:#e08cff}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#282457 0,#10142b 45%,var(--bg) 100%);color:var(--text);font:16px/1.7 system-ui,Arial,sans-serif}
+  .page{width:min(calc(100% - 28px),820px);margin:26px auto 56px}
+  .top-nav{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+  .top-nav a{display:inline-block;padding:8px 12px;text-decoration:none;border:1px solid var(--line);border-radius:9px;background:#131f3c;color:var(--cyan);font-weight:700;font-size:.84rem}
+  .top-nav a:hover,.top-nav a:focus-visible{background:#253863}
+  a{color:#9cefff;text-underline-offset:3px}
+  a:focus-visible{outline:3px solid #c8a5ff;outline-offset:3px}
+  .panel{padding:clamp(17px,4vw,34px);border:1px solid var(--line);border-radius:16px;background:linear-gradient(155deg,#182043,#0b1327);box-shadow:0 24px 55px #0005}
+  header{text-align:center;margin:0 0 24px}
+  .eyebrow{margin:0 0 4px;color:var(--pink);font-size:.75rem;font-weight:900;letter-spacing:.19em}
+  h1{margin:0;color:var(--cyan);font-size:clamp(1.85rem,5vw,2.7rem);letter-spacing:.045em;line-height:1.23}
+  .lead{font-size:1.02rem;color:#cbddf3;margin:12px 0 0}
+  h2{color:var(--pink);font-size:1.28rem;margin:27px 0 10px;line-height:1.3}
+  h3{color:var(--cyan);font-size:1.02rem;margin:18px 0 6px}
+  p{margin:10px 0;color:#dce8fa}
+  li{margin:6px 0;color:#dce8fa}
+  ul{padding-left:24px}
+  kbd{border:1px solid #6a7baf;background:#07142c;color:#eaf7ff;border-radius:5px;padding:2px 7px;font:inherit;font-weight:750;white-space:nowrap}
+  .note{background:#111f40;border-left:3px solid var(--cyan);padding:12px 14px;border-radius:3px}
+  .muted{color:var(--muted)}
+  .page-footer{margin:22px auto 0;text-align:center;font-size:.83rem;color:var(--muted)}
+  @media(max-width:470px){.page{width:min(calc(100% - 16px),820px);margin:12px auto 32px}.top-nav{gap:7px}.top-nav a{font-size:.75rem;padding:7px 9px}}
+
+  </style>
+</head>
+<body>
+<div class="page">
+  <nav class="top-nav" aria-label="Game navigation">
+    <a href="./">← PLAY NEON BREAKOUT</a>
+    <a href="about.html">ABOUT &amp; CONTROLS</a>
+    <a href="privacy.html">PRIVACY</a>
+    <a href="/Star-Swarm/arcade/">ALL ARCADE GAMES</a>
+  </nav>
+
+  <main class="panel">
+    <header>
+      <p class="eyebrow">✦ ARCADE RECHARGED</p>
+      <h1>ABOUT NEON BREAKOUT</h1>
+      <p class="lead">Break the bricks. Keep the ball alive. Chase your high score.</p>
+    </header>
+    <p><strong>Neon Breakout</strong> is a free, single-player brick-breaking arcade game created by MrJim. Move your neon paddle to bounce the ball, destroy every brick and clear all three sectors. No account or installation is required.</p>
+    <h2>How to play</h2>
+    <p>Use the paddle to send the ball toward the glowing bricks. You start with <strong>3 lives</strong>; losing the ball costs one. Clear a sector to advance to the next. Some tougher bricks need two hits, and breaking bricks in quick succession builds your combo score.</p>
+    <h3>Computer controls</h3>
+    <ul>
+      <li><kbd>←</kbd> / <kbd>→</kbd>, <kbd>A</kbd> / <kbd>D</kbd>, or move your <strong>mouse</strong> left and right — move the paddle.</li>
+      <li><kbd>Space</kbd> or left-click on the playfield — launch the ball.</li>
+      <li><kbd>P</kbd> or <kbd>Esc</kbd> — pause or resume the game.</li>
+      <li><kbd>M</kbd> — toggle sound; the speaker icon also works.</li>
+    </ul>
+    <h3>Phone and tablet controls</h3>
+    <p><strong>Drag left or right</strong> on the playfield to move your paddle, and <strong>tap</strong> to launch the ball. Use the on-screen pause and sound buttons when needed.</p>
+    <h2>Power-ups</h2>
+    <p>Bricks with a glowing hollow outline contain a power-up. Break them and catch the falling bonus with your paddle:</p>
+    <ul>
+      <li><strong>W — Wide Paddle:</strong> widens the paddle temporarily.</li>
+      <li><strong>M — Multiball:</strong> puts extra balls into play.</li>
+      <li><strong>S — Slow-Mo:</strong> slows the ball down temporarily.</li>
+    </ul>
+    <h2>Your personal best</h2>
+    <p>The game remembers your best score on the same device using browser storage. There is no global leaderboard or player account. Details are explained in the <a href="privacy.html#storage">Privacy &amp; Storage</a> page.</p>
+    <p class="note"><strong>Ready to play?</strong> <a href="./">Launch Neon Breakout →</a></p>
+  </main>
+  <footer class="page-footer">Neon Breakout · Created by MrJim · <a href="./">Back to the game</a></footer>
+</div>
+</body>
+</html>
